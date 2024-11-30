@@ -2,7 +2,7 @@
 
 ### EDITABLE SECTION
 # java command
-JAVA=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/opcua/jdk-11.0.2/bin/java
+JAVA=java
 
 # dependencies
 LIBS='../libs/plc4j-api-0.10.0.jar:'\
@@ -36,15 +36,15 @@ cd build
 
 # parse the command line
 if [ -z $1 ] || [ $1 = "--help" ]; then
-  echo "jidl-test.sh [shell|gui|jar-shell|jar-gui|prova]"
+  echo "jidl-test.sh [shell|gui|jar-shell|jar-gui]"
 elif [ $1 = "shell" ]; then
-  "$JAVA" -cp "./:${LIBS}" com.github.ilguido.jidl.jidlcl -c test/dummy.ini
+  "$JAVA" -cp "./:${LIBS}" com.github.ilguido.jidl.jidlcl -a -c test/dummy.ini
 elif [ $1 = "gui" ]; then
-  "$JAVA" -cp "./:${LIBS}" com.github.ilguido.jidl.gui.jidlss -c test/dummy.ini
+  "$JAVA" -cp "./:${LIBS}" com.github.ilguido.jidl.gui.jidlss
 elif [ $1 = "jar-shell" ]; then
-  "$JAVA" -cp "jidl-0.8.jar:../${LIBS}" com.github.ilguido.jidl.jidlcl -c test/dummy.ini
+  "$JAVA" -cp "jidl-0.8.jar:../${LIBS}" com.github.ilguido.jidl.jidlcl -a -c test/dummy.ini
 elif [ $1 = "jar-gui" ]; then
-  "$JAVA" -cp "jidl-0.8.jar:${LIBS}" com.github.ilguido.jidl.gui.jidlss -c test/dummy.ini
+  "$JAVA" -cp "jidl-0.8.jar:${LIBS}" com.github.ilguido.jidl.gui.jidlss
 else
   echo "unknown parameter $1"
   echo .
