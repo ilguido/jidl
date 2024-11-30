@@ -1,5 +1,5 @@
 # jidl
-Java Industrial Data Logger based on Apache PLC4J.
+Java Industrial Data Logger based on [Apache PLC4J](https://plc4x.apache.org/).
 
 ## Notice
 JIDL is alpha software and insecure in a production environment.
@@ -184,4 +184,4 @@ Example, following the preceding example:
 |2024-07-15 18:17:20,0 | 137               |
 ```
 #### In case of using the dummy data logger
-Since the dummy data logger does use a data base, it reads its "JIDL Configuration" from an INI file. The contents of this INI file are the same as the `DATA` column of the *JIDL Configuration* table.
+Since the dummy data logger does not use a data base, it reads its "JIDL Configuration" from an INI file. The contents of this INI file are the same as the `DATA` column of the *JIDL Configuration* table.
