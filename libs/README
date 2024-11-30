@@ -1,0 +1,29 @@
+## LIBRARIES
+
+# various sql
+mariadb-java-client-3.5.1.jar
+monetdb-jdbc-3.2.jre8.jar
+sqlite-jdbc-3.36.0.3.jar
+
+# plc4j and its dependecies
+bcprov-jdk15on-1.70.jar
+bit-io-1.4.3.jar
+commons-codec-1.15.jar
+commons-lang3-3.12.0.jar
+jackson-annotations-2.13.3.jar
+json-simple-4.0.1.jar
+netty-buffer-4.1.82.Final.jar
+netty-codec-4.1.82.Final.jar
+netty-common-4.1.82.Final.jar
+netty-handler-4.1.82.Final.jar
+netty-resolver-4.1.82.Final.jar
+netty-transport-4.1.82.Final.jar
+plc4j-api-0.10.0.jar
+plc4j-driver-modbus-0.10.0.jar
+plc4j-driver-opcua-0.10.0.jar
+plc4j-driver-s7-0.10.0.jar
+plc4j-spi-0.10.0.jar
+plc4j-transport-tcp-0.10.0.jar
+slf4j-api-2.0.3.jar
+slf4j-simple-2.0.3.jar
+vavr-0.10.4.jar
