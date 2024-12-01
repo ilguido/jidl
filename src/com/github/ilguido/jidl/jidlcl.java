@@ -44,9 +44,17 @@ class jidlcl extends jidl {
 
   /**
    * Main method.
+   *
+   * @param args the command line arguments <br>
+   *             <code>-c filename</code> to load a configuration file<br>
+   *             <code>-a</code> to autostart the data logging
    */
   public static void main(String[] args)
     throws IllegalArgumentException, ExecutionException {
+    System.out.println("JIDL version 0.8  Copyright (C) 2024  Stefano Guidoni");
+    System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
+    System.out.println("This is free software, and you are welcome to \n" + 
+                       "redistribute it under certain conditions.");
     if (initJidl(args))
       dataLogger.startLogging();
   }

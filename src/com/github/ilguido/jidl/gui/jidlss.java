@@ -64,7 +64,7 @@ public class jidlss extends jidl {
    * Launches a simple system tray application.
    *
    * @param args the command line arguments <br>
-   *             <code>-c filename</code> to load a configuration file
+   *             <code>-c filename</code> to load a configuration file<br>
    *             <code>-a</code> to autostart the data logging
    */
   public static void main(String[] args) {
@@ -130,6 +130,7 @@ public class jidlss extends jidl {
     MenuItem startItem = new MenuItem(rb.getString("Start"));
     MenuItem stopItem = new MenuItem(rb.getString("Stop"));
     MenuItem statusItem = new MenuItem(rb.getString("Status"));
+    MenuItem aboutItem = new MenuItem(rb.getString("About"));
     MenuItem exitItem = new MenuItem(rb.getString("Quit"));
         
     //Add components to popup menu
@@ -144,6 +145,7 @@ public class jidlss extends jidl {
     logMenu.addSeparator();
     logMenu.add(statusItem);
     popup.addSeparator();
+    popup.add(aboutItem);
     popup.add(exitItem);
         
     trayIcon.setPopupMenu(popup);
@@ -230,7 +232,23 @@ public class jidlss extends jidl {
         System.exit(0);
       }
     });
-        
+    
+    // "about" window
+    aboutItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        //Create and set up the about window.
+        JFrame frame = new JFrame(rb.getString("About"));
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        jidlAboutWindow jaw = new jidlAboutWindow();
+        frame.getContentPane().add(jaw.getTextPane());
+        frame.setIconImage(createImage("icons/jidlss.png", "popup icon"));
+
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+      }
+    });
+    
     // load configuration
     loadItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionEvent) 
