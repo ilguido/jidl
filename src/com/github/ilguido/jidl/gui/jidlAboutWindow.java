@@ -105,8 +105,11 @@ public class jidlAboutWindow extends JFrame {
         System.err.println("Couldn't insert text into text pane.");
     }
     
-    //Provide a preferred size for the text pane.
+    // Provide a preferred size for the text pane.
     textarea.setPreferredSize(new Dimension(400, 320));
+    
+    // Disable text editing.
+    textarea.setEditable(false);
   }
 
   /**

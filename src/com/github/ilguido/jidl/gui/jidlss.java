@@ -180,21 +180,7 @@ public class jidlss extends jidl {
                                   rb.getString("Configuration not loaded"), 
                                   TrayIcon.MessageType.ERROR);
         } else if (rb.getString("Start").equals(item.getLabel())) {
-          if (dataLogger.getStatus() == false) {
-            try {
-              dataLogger.startLogging(h);
-              trayIcon.setImage(createImage("icons/jidlss_s.png", "started"));
-            } catch (ExecutionException ee) {
-              trayIcon.displayMessage("JIDL",
-                               rb.getString("Cannot start the data logging: ") +
-                                      ee.toString() + ee.getMessage(),
-                                      TrayIcon.MessageType.ERROR);
-            }
-          } else {
-            trayIcon.displayMessage("JIDL",
-                                   rb.getString("Data logging already running"),
-                                   TrayIcon.MessageType.WARNING);
-          }
+          startAction(h, trayIcon);
         } else if (rb.getString("Stop").equals(item.getLabel())) {
           if (dataLogger.getStatus() == true) {
             dataLogger.stopLogging();
@@ -283,17 +269,8 @@ public class jidlss extends jidl {
     });
     
     // autostart
-    //FIXME: duplicated code!
     if (autostarted) {
-      try {
-        dataLogger.startLogging(h);
-        trayIcon.setImage(createImage("icons/jidlss_s.png", "started"));
-      } catch (ExecutionException ee) {
-        trayIcon.displayMessage("JIDL",
-                               rb.getString("Cannot start the data logging: ") +
-                                ee.toString() + ee.getMessage(),
-                                TrayIcon.MessageType.ERROR);
-      }
+      startAction(h, trayIcon);
     }
   }
     
@@ -313,5 +290,31 @@ public class jidlss extends jidl {
       } else {
           return (new ImageIcon(imageURL, description)).getImage();
       }
+  }
+  
+  /**
+   * Starts the data logging.
+   *
+   * @param inH a reference to an UncaughtExceptionHandler, which is used
+   *            to show warning messages when something bad happens
+   * @param inTrayIcon a reference to the tray icon object
+   */
+  private static void startAction(Thread.UncaughtExceptionHandler inH,
+                                  TrayIcon inTrayIcon) {
+    if (dataLogger.getStatus() == false) {
+      try {
+        dataLogger.startLogging(inH);
+        inTrayIcon.setImage(createImage("icons/jidlss_s.png", "started"));
+      } catch (ExecutionException ee) {
+        inTrayIcon.displayMessage("JIDL",
+                              rb.getString("Cannot start the data logging: ") +
+                                  ee.toString() + ee.getMessage(),
+                                  TrayIcon.MessageType.ERROR);
+      }
+    } else {
+      inTrayIcon.displayMessage("JIDL",
+                                rb.getString("Data logging already running"),
+                                TrayIcon.MessageType.WARNING);
+    }
   }
 }

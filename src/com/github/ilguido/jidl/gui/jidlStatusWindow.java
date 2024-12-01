@@ -118,6 +118,9 @@ public class jidlStatusWindow extends JFrame
     StyledDocument doc = description.getStyledDocument();
     addStylesToDocument(doc);
 
+    // Disable text editing.
+    description.setEditable(false);
+    
     //Create a split pane with the two scroll panes in it.
     splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                  listScrollPane, description);
