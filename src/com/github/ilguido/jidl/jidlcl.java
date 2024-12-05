@@ -22,6 +22,7 @@
 package com.github.ilguido.jidl;
 
 import java.io.File;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import com.github.ilguido.jidl.datalogger.*;
@@ -43,7 +44,9 @@ class jidlcl extends jidl {
   public int loglevel = 0;
 
   /**
-   * Main method.
+   * Main method, it starts the command line interface of jidl.  It needs a
+   * configuration file among its arguments. If it is not autostarted, it waits
+   * for user input.
    *
    * @param args the command line arguments <br>
    *             <code>-c filename</code> to load a configuration file<br>
@@ -55,7 +58,28 @@ class jidlcl extends jidl {
     System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
     System.out.println("This is free software, and you are welcome to \n" + 
                        "redistribute it under certain conditions.");
-    if (initJidl(args))
+    if (initJidl(args)) {
       dataLogger.startLogging();
+    } else {
+      boolean run = true;
+      Scanner userInput = new Scanner(System.in);
+      while (run) {
+        System.out.println("Enter [s] to start logging, [p] to pause, [q] to " +
+                           "quit.");
+
+        String input = userInput.next();
+        if (!input.isEmpty()) {
+          if (input.equals("s")) {
+            dataLogger.startLogging();
+          } else if (input.equals("p")) {
+            dataLogger.stopLogging();
+          } else if (input.equals("q")) {
+            run = false;
+          } else {
+            System.out.println("Unknown command: " + input);
+          }
+        }
+      }
+    }
   }
 }
