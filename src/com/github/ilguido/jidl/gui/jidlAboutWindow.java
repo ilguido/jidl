@@ -21,13 +21,16 @@
 
 package com.github.ilguido.jidl.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.text.*;
+import java.awt.Dimension;
+import javax.swing.JFrame;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 
-import java.util.*;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 
@@ -48,23 +51,17 @@ public class jidlAboutWindow extends JFrame {
   /**
    * A resource bundle for the localization of the GUI.
    */
-  private ResourceBundle rb;
+  private final ResourceBundle rb;
 
   /**
    * Class constructor.  It creates the contents of the about window and put
    * them in a JTextPane.
+   *
+   * @param inRB the <code>ResourceBundle</code> used for the localization of
+   *             the GUI
    */
-  public jidlAboutWindow() {
-    Locale locallocale = Locale.getDefault();
-    if (locallocale.getLanguage().equals("it")) {
-      Locale itlocale = new Locale("it");
-      rb = ResourceBundle.getBundle("com.github.ilguido.jidl.gui.locale." +
-                                    "jidlResources", itlocale);
-    } else {
-      Locale nulllocale = new Locale("");
-      rb = ResourceBundle.getBundle("com.github.ilguido.jidl.gui.locale." + 
-                                    "jidlResources", nulllocale);
-    }
+  public jidlAboutWindow(final ResourceBundle inRB) {
+    rb = inRB;
 
     // the text area and all its contents
     textarea = new JTextPane();

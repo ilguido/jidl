@@ -21,18 +21,26 @@
 
 package com.github.ilguido.jidl.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import java.awt.Dimension;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 
-import java.util.*;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.github.ilguido.jidl.connectionmanager.*;
+import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 
 /**
  * jidlStatusWindow
@@ -45,57 +53,50 @@ import com.github.ilguido.jidl.connectionmanager.*;
 public class jidlStatusWindow extends JFrame
   implements ListSelectionListener {
   /**
-    * A pane with the description of the selected connection.
-    */
+   * A pane with the description of the selected connection.
+   */
   private JTextPane description;
   
   /**
-    * The list of connections to put in a scroll pane.
-    */
+   * The list of connections to put in a scroll pane.
+   */
   private JList<String> list;
   
   /**
-    * A split pane, the main container of the status window.
-    */
+   * A split pane, the main container of the status window.
+   */
   private JSplitPane splitPane;
   
   /**
-    * The list of connections.
-    */
+   * The list of connections.
+   */
   private String[] listItems;
   
   /**
-    * The list of {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager} objects.
-    */
+   * The list of {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager} objects.
+   */
   private List<ConnectionManager> connectionList;
   
   /**
-    * A resource bundle for the localization of the GUI.
-    */
-  private ResourceBundle rb;
+   * A resource bundle for the localization of the GUI.
+   */
+  private final ResourceBundle rb;
 
   /**
    * Class constructor.  It creates the contents of the status window and put
    * them in a JSplitPane.
    *
+   * @param inRB the <code>ResourceBundle</code> used for the localization of
+   *             the GUI
    * @param inList a list of {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager}
    *               objects
    */
-  public jidlStatusWindow(List<ConnectionManager> inList) {
+  public jidlStatusWindow(final ResourceBundle inRB, 
+                          List<ConnectionManager> inList) {
     int i = 0;
+    rb = inRB;
     connectionList = inList;
     listItems = new String[connectionList.size()];
-    
-    Locale locallocale = Locale.getDefault();
-    if (locallocale.getLanguage().equals("it")) {
-      Locale itlocale = new Locale("it");
-      rb = ResourceBundle.getBundle("com.github.ilguido.jidl.gui.locale." +
-                                    "jidlResources", itlocale);
-    } else {
-      Locale nulllocale = new Locale("");
-      rb = ResourceBundle.getBundle("com.github.ilguido.jidl.gui.locale." + 
-                                    "jidlResources", nulllocale);
-    }
 
     // build an array of strings:
     // it is the list of connections
