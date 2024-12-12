@@ -89,11 +89,13 @@ public class jidl implements DataTypes {
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         System.out.println("Shutting down...");
-        if (dataLogger.getStatus())
-          dataLogger.stopLogging();
-          
-        if (dataLogger.isArchiver() && dataLogger.isArchiverSet()) {
-          dataLogger.stopArchivingService();
+        if (dataLogger != null) {
+          if (dataLogger.getStatus())
+            dataLogger.stopLogging();
+            
+          if (dataLogger.isArchiver() && dataLogger.isArchiverSet()) {
+            dataLogger.stopArchivingService();
+          }
         }
           
       }
