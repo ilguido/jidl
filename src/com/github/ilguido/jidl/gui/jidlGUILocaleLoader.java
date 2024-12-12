@@ -19,7 +19,7 @@
  * along with jidl.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ilguido.jidl.gui;;
+package com.github.ilguido.jidl.gui;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
