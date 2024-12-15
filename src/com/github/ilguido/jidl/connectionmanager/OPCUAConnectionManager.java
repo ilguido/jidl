@@ -23,8 +23,10 @@ package com.github.ilguido.jidl.connectionmanager;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.management.AttributeNotFoundException;
 
+import com.github.ilguido.jidl.utils.Decrypter;
 import com.github.ilguido.jidl.variable.VariableReader;
 import com.github.ilguido.jidl.variable.VariableWriter;
 import com.github.ilguido.jidl.variable.opcua.OPCUAVariableReader;
@@ -73,7 +75,10 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
   
   /**
    * Class constructor.  It calls the parent class constructor and then create
-   * the client object.
+   * the client object. If a user name and a password are provided, those are
+   * used for the login. If a salt and initialization vector are provided too,
+   * then the user name and the password are expected to be Base64 encoded,
+   * AES encrypted strings.
    *
    * @param inName the mnemonic name of the connection
    * @param inIP the IP address of the device
@@ -82,8 +87,11 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
    * @param inDiscovery a boolean value to request the discovery endpoint
    * @param inUsername a string value for the user name
    * @param inPassword a string value for the user password
+   * @param inSalt a Base64 encoded string value for the cryptographic salt
+   * @param inIV a Base64 encoded string value for the initialization vector
    * @param inSeconds the sample time
    * @throws IllegalArgumentException if some input parameter is not valid
+   * @throws ExecutionException if decrypting user credentials failed
    */
   public OPCUAConnectionManager(String inName, 
                                 String inIP, 
@@ -92,15 +100,20 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
                                 Boolean inDiscovery,
                                 String inUsername,
                                 String inPassword,
+                                String inSalt,
+                                String inIV,
                                 int inSeconds)
-    throws IllegalArgumentException {
+    throws IllegalArgumentException, ExecutionException {
     super(inName, "opcua", "opcua:tcp://" + inIP + ":" + 
                            Integer.toString(inPort) +
                            "/" + inPath + "?discovery=" + 
                            inDiscovery.toString() +
                            ((inUsername != null && inPassword != null) ? 
-                           "&username=" + inUsername + "&password=" + 
-                           inPassword : ""));
+                           "&username=" + 
+                           Decrypter.decrypt(inUsername, inSalt, inIV) + 
+                           "&password=" + 
+                           Decrypter.decrypt(inPassword, inSalt, inIV) :
+                           ""));
 
     ipAddress = inIP;
     port = inPort;

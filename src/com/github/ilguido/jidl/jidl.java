@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import com.github.ilguido.jidl.datalogger.*;
 import com.github.ilguido.jidl.datalogger.dataloggerarchiver.DataLoggerArchiver;
 import com.github.ilguido.jidl.connectionmanager.*;
+import com.github.ilguido.jidl.utils.Decrypter;
 import com.github.ilguido.jidl.utils.FileManager;
 import com.github.ilguido.jidl.variable.VariableReader;
 
@@ -116,7 +117,7 @@ public class jidl implements DataTypes {
    * @throws IllegalArgumentException when the <code>inSelectedFile</code> is
    *                                  not a valid configuration file or it is
    *                                  not readable
-   * @throws ExecutionException if there is an error initializing objects
+   * @throws ExecutionException if an error occurs when initializing objects
    * @return the configuration of the database as a list of maps
    */
   protected
@@ -163,6 +164,7 @@ public class jidl implements DataTypes {
             throw new IllegalArgumentException("type = " + 
                                                sectionMap.get("type"));
         }
+        Decrypter.setSecretKey(sectionMap.get("key"));
       } else if (sectionMap.get("section").equals("dataarchiver")) {
         if (dataLogger.isArchiver()) {
           dataLogger.setArchivingService(
@@ -199,11 +201,12 @@ public class jidl implements DataTypes {
    *                                  configuration misses some required
    *                                  parameter or some parameter is invalid
    *                                  etc.
+   * @throws ExecutionException if an error occurs when initializing objects
    */
   private 
   static List<ConnectionManager> 
         parseInitializationData(List<Map<String, String>> inInitializationData) 
-    throws IllegalArgumentException {
+    throws IllegalArgumentException, ExecutionException {
     List<ConnectionManager> list = new LinkedList<>();
     /* A hashmap of VariableReader objects that we could use as a source when
      * creating new VariableWriters objects.
@@ -264,6 +267,8 @@ public class jidl implements DataTypes {
                           Boolean.parseBoolean(sectionMap.get("discovery")),
                                                   sectionMap.get("username"),
                                                   sectionMap.get("password"),
+                                                  sectionMap.get("salt"),
+                                                  sectionMap.get("iv"),
                                  Integer.parseInt(sectionMap.get("seconds")));
                 break;
               case "json":
