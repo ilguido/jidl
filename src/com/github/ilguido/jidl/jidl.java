@@ -160,7 +160,8 @@ public class jidl implements DataTypes {
                                               sectionMap.get("dir"));
             break;
           default:
-            throw new IllegalArgumentException("type = ");
+            throw new IllegalArgumentException("type = " + 
+                                               sectionMap.get("type"));
         }
       } else if (sectionMap.get("section").equals("dataarchiver")) {
         if (dataLogger.isArchiver()) {
