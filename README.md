@@ -121,7 +121,7 @@ The `ID` cell determines the type of section.
   - the `ID` must be the alphanumeric name of the tag, then two colons, then the alphanumeric name of the connection, e.g. `mytag::myconnection`
   - the `DATA` contains an INI section with the address and data type of the tag
 - *tag writer* row
-  - the `ID` must be the alphanumeric name of the tag, then two colons, then the alphanumeric name of the connection, then "lesser than", than "minus", then a tag reader full name, e.g. `myothertag::myotherconnection<-mytag::myconnection`
+  - the `ID` must be the alphanumeric name of the tag, then two colons, then the alphanumeric name of the connection, then "lesser than", then "minus", then a tag reader full name, e.g. `myothertag::myotherconnection<-mytag::myconnection`
   - the `DATA` contains an INI section with the address of the tag
   - JIDL writes into this tag the value of the specified tag reader, e.g. the value of mytag::myconnection is written to myothertag::myotherconnection
 Example:
