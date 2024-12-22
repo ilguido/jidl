@@ -64,14 +64,14 @@ public class ModbusConnectionManager extends PLCConnectionManager {
    * @param inIP the IP address of the device
    * @param inPort the port number of the TCP/IP connection
    * @param inOrder the order of the words in double words
-   * @param inSeconds the sample time
+   * @param inDeciseconds the sample time
    * @throws IllegalArgumentException if some input parameter is not valid
    */
   public ModbusConnectionManager(String inName, 
                                  String inIP, 
                                  int inPort, 
                                  boolean inOrder,
-                                 int inSeconds)
+                                 int inDeciseconds)
     throws IllegalArgumentException {
     super(inName, "modbus", "modbus-tcp:tcp://" + inIP + ":" +
                             Integer.toString(inPort));
@@ -80,7 +80,7 @@ public class ModbusConnectionManager extends PLCConnectionManager {
     port = inPort;
     reversed = inOrder;
 
-    setSampleTime(inSeconds);
+    setSampleTime(inDeciseconds);
     
     // get a client
     try {

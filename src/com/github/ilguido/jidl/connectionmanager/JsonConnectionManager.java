@@ -55,17 +55,17 @@ public class JsonConnectionManager extends ConnectionManager
    *
    * @param inName the mnemonic name of the connection
    * @param inAddress the address of the connection
-   * @param inSeconds the sample time
+   * @param inDeciseconds the sample time
    * @throws IllegalArgumentException if <code>inName</code> is not a valid name
    *                                  or <code>inAddress</code> is malformed
    */
   public JsonConnectionManager(String inName, 
                                String inAddress,
-                               int inSeconds)
+                               int inDeciseconds)
     throws IllegalArgumentException {
     super(inName, "json", inAddress);
     
-    setSampleTime(inSeconds);
+    setSampleTime(inDeciseconds);
     client = new HTTPJidlClient(inAddress);
   }
 

@@ -65,14 +65,14 @@ public class S7ConnectionManager extends PLCConnectionManager {
    * @param inIP the IP address of the device
    * @param inRack the rack number of the S7 device
    * @param inSlot the slot number of the S7 device
-   * @param inSeconds the sample time
+   * @param inDeciseconds the sample time
    * @throws IllegalArgumentException if some input parameter is not valid
    */
   public S7ConnectionManager(String inName,
                              String inIP,
                              int inRack,
                              int inSlot,
-                             int inSeconds)
+                             int inDeciseconds)
     throws IllegalArgumentException {
     super(inName, "S7", "s7://" + inIP + "?remote-rack=" + inRack +
                         "&remote-slot=" + inSlot);
@@ -81,7 +81,7 @@ public class S7ConnectionManager extends PLCConnectionManager {
     rack = inRack;
     slot = inSlot;
 
-    setSampleTime(inSeconds);
+    setSampleTime(inDeciseconds);
     
     // get a client
     try {

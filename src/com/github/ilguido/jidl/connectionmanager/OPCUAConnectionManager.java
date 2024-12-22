@@ -89,7 +89,7 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
    * @param inPassword a string value for the user password
    * @param inSalt a Base64 encoded string value for the cryptographic salt
    * @param inIV a Base64 encoded string value for the initialization vector
-   * @param inSeconds the sample time
+   * @param inDeciseconds the sample time
    * @throws IllegalArgumentException if some input parameter is not valid
    * @throws ExecutionException if decrypting user credentials failed
    */
@@ -102,7 +102,7 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
                                 String inPassword,
                                 String inSalt,
                                 String inIV,
-                                int inSeconds)
+                                int inDeciseconds)
     throws IllegalArgumentException, ExecutionException {
     super(inName, "opcua", "opcua:tcp://" + inIP + ":" + 
                            Integer.toString(inPort) +
@@ -122,7 +122,7 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
     username = inUsername;
     password = inPassword;
 
-    setSampleTime(inSeconds);
+    setSampleTime(inDeciseconds);
     
     // get a client
     try {

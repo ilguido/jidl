@@ -250,14 +250,16 @@ public class jidl implements DataTypes {
                                                sectionMap.get("address"),
                                 Integer.parseInt(sectionMap.get("rack")),
                                 Integer.parseInt(sectionMap.get("slot")),
-                             Integer.parseInt(sectionMap.get("seconds")));
+                               parseSampleTime(sectionMap.get("seconds"),
+                                         sectionMap.get("deciseconds")));
                 break;
               case "modbus":
                 newc = new ModbusConnectionManager(sectionMap.get("section"),
                                                    sectionMap.get("address"),
                                     Integer.parseInt(sectionMap.get("port")),
                             Boolean.parseBoolean(sectionMap.get("reversed")),
-                                 Integer.parseInt(sectionMap.get("seconds")));
+                                   parseSampleTime(sectionMap.get("seconds"),
+                                             sectionMap.get("deciseconds")));
                 break;
               case "opcua":
                 newc = new OPCUAConnectionManager(sectionMap.get("section"),
@@ -269,12 +271,14 @@ public class jidl implements DataTypes {
                                                   sectionMap.get("password"),
                                                   sectionMap.get("salt"),
                                                   sectionMap.get("iv"),
-                                 Integer.parseInt(sectionMap.get("seconds")));
+                                 parseSampleTime(sectionMap.get("seconds"),
+                                            sectionMap.get("deciseconds")));
                 break;
               case "json":
                 newc = new JsonConnectionManager(sectionMap.get("section"),
-                                                  sectionMap.get("address"),
-                                 Integer.parseInt(sectionMap.get("seconds")));
+                                                 sectionMap.get("address"),
+                                 parseSampleTime(sectionMap.get("seconds"),
+                                           sectionMap.get("deciseconds")));
                 break;
               default:
                 throw new IllegalArgumentException(sectionMap.get("section") +
@@ -353,6 +357,42 @@ public class jidl implements DataTypes {
       }
     
     return list;
+  }
+  
+  /**
+   * Parses the sample time setting of a connection.  The sample time of a 
+   * connection can be set in seconds or deciseconds, but not both. Sample times
+   * longer than 1 second are rounded to the nearest second. The default return
+   * value is zero.
+   *
+   * @param inSeconds the desired sample time in seconds
+   * @param inDeciseconds the desired sample time in deciseconds
+   * @return the sample time in deciseconds, or zero when no valid sample time
+   *         was parsed
+   * @throws IllegalArgumentException when both seconds and deciseconds are set
+   */
+  private static int parseSampleTime(String inSeconds, String inDeciseconds)
+    throws IllegalArgumentException {
+    if (inSeconds != null && inDeciseconds != null) {
+      throw new IllegalArgumentException ("Connection has both seconds and " +
+                                          "deciseconds fields set.");
+    }
+    
+    if (inSeconds != null) {
+      /* Multiply by ten: jidl uses deciseconds internally. */
+      return 10 * Integer.parseInt(inSeconds);
+    }
+    
+    if (inDeciseconds != null) {
+      if (inDeciseconds.length() > 1) {
+        /* Sample times above 1 second are rounded to the nearest second. */
+        return (int) Math.round(Integer.parseInt(inDeciseconds) / 10.0) * 10;
+      } else {
+        return Integer.parseInt(inDeciseconds);
+      }
+    }
+    
+    return 0;
   }
   
   /**

@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
@@ -239,12 +240,25 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
     throws ExecutionException {
     log(name + ": startLogging()", false);
     
-    /* Are there uninitialized connections? */
+    /* This flag is true if there are connections having sample times below 
+     * 1 second.
+     */
+    boolean decisecondStep = false;
+    
     for (final ConnectionManager connection : connectionList) {
+      /* Are there uninitialized connections? */
       if (!connection.isInitialized()) {
         log(connection.getName() + " failed initialization", false);
       }
+      /* Are there connections with a sample time below 1 second? */
+      if (connection.getSampleTime() < 10) {
+        /* Yes, there are. Set the timestep to 1 decisecond. */
+        decisecondStep = true;
+      }
     }
+    
+    /* Set the time step in deciseconds, its default value is 1 second. */
+    final int timestep = (decisecondStep? 1 : 10);
     
     if (timer == null) {
       timer = Executors.newSingleThreadScheduledExecutor();
@@ -252,10 +266,10 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
       timer.scheduleAtFixedRate(new Runnable() {
         @Override
         public void run() {
-          internalCounter += 1;
+          internalCounter += timestep;
           /* CountDownLatch is used to synchronized the concurrent readings from
-          * each connection.
-          */
+           * each connection.
+           */
           CountDownLatch rlatch = new CountDownLatch(connectionList.size());
           /* Main reading cycle */
           for (final ConnectionManager connection : connectionList) {
@@ -345,7 +359,8 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
             t.start();
           }
         }
-      }, 1, 1, SECONDS);
+      /* Our basic unit is the decisecond. */
+      }, (timestep * 100), (timestep * 100), MILLISECONDS);
     }
   }
 

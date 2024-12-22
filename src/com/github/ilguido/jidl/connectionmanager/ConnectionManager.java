@@ -75,10 +75,10 @@ public abstract class ConnectionManager implements DataTypes {
   private final String name;
 
   /**
-   * Sample time in seconds.  It is the time interval between readings and its
-   * default value is 1 second.
+   * Sample time in deciseconds.  It is the time interval between readings and
+   * its default value is 1 second.
    */
-  private int sampleTime = 1;
+  private int sampleTime = 10;
 
   /**
    * Timestamp of the last reading.
@@ -188,7 +188,7 @@ public abstract class ConnectionManager implements DataTypes {
   /**
    * Returns the sample time.
    *
-   * @return the sample time in seconds
+   * @return the sample time in deciseconds
    */
   public Integer getSampleTime() {
     return Integer.valueOf(sampleTime);
@@ -283,16 +283,16 @@ public abstract class ConnectionManager implements DataTypes {
   /**
    * Set the sample time.
    *
-   * @param inSeconds time interval between readings, in seconds
-   * @throws IllegalArgumentException if the <code>inSeconds</code> is zero or
-   *                                  a negative number
+   * @param inDeciseconds time interval between readings, in deciseconds
+   * @throws IllegalArgumentException if the <code>inDeciseconds</code> is zero
+   *                                  or a negative number
    */
-  public void setSampleTime(int inSeconds)
+  public void setSampleTime(int inDeciseconds)
     throws IllegalArgumentException {
-    if (inSeconds < 1)
+    if (inDeciseconds < 1)
       throw new IllegalArgumentException("Sample time must be a positive int");
 
-    sampleTime = inSeconds;
+    sampleTime = inDeciseconds;
   }
   
   /**
