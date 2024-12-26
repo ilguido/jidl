@@ -83,7 +83,7 @@ public abstract class ModbusVariable extends VariableCommon {
         addressSuffix = "[2]";
         break;
       case TEXT:
-        addressSuffix = "[" + getTagSize() + "]";
+        addressSuffix = "[" + String.valueOf(getTagSize()) + "]";
         break;
       default:
         addressSuffix = "";
