@@ -79,6 +79,7 @@ public abstract class ModbusVariable extends VariableCommon {
     switch (inType) {
       case DOUBLE_INTEGER:
       case REAL:
+      case DOUBLE_WORD:
         addressSuffix = "[2]";
         break;
       case TEXT:
@@ -172,6 +173,7 @@ public abstract class ModbusVariable extends VariableCommon {
         break;
       case DOUBLE_INTEGER:
       case REAL:
+      case DOUBLE_WORD:
         if (size == 1)
           throw new IllegalArgumentException("Illegal Modbus address for " +
                                              "double word variable: " + 

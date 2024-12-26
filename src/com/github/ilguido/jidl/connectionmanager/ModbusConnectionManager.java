@@ -210,11 +210,13 @@ public class ModbusConnectionManager extends PLCConnectionManager {
       case BOOLEAN:
       case INTEGER:
       case WORD:
+      case FLOAT:
       case TEXT:
         v = new ModbusVariableReader(inName, inAddress, inType, client, false);
         break;
       case DOUBLE_INTEGER:
       case REAL:
+      case DOUBLE_WORD:
         v = new ModbusVariableReader(inName, inAddress, inType, client, reversed);
         break;
       default:
@@ -258,12 +260,14 @@ public class ModbusConnectionManager extends PLCConnectionManager {
       case BOOLEAN:
       case INTEGER:
       case WORD:
+      case FLOAT:
       case TEXT:
         v = new ModbusVariableWriter(inName, inAddress, inType, inSource, 
                                      client, false);
         break;
       case DOUBLE_INTEGER:
       case REAL:
+      case DOUBLE_WORD:
         v = new ModbusVariableWriter(inName, inAddress, inType, inSource, 
                                      client, reversed);
         break;

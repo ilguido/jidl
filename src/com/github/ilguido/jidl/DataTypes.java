@@ -41,6 +41,7 @@ public interface DataTypes {
     REAL,
     BYTE,
     WORD,
+    DOUBLE_WORD,
     TEXT;
 
     /**
@@ -120,6 +121,7 @@ public interface DataTypes {
         case DOUBLE_INTEGER:
         case BYTE:
         case WORD:
+        case DOUBLE_WORD:
           return "INTEGER";
         case FLOAT:
         case REAL:
@@ -145,6 +147,7 @@ public interface DataTypes {
         case DOUBLE_INTEGER:
         case BYTE:
         case WORD:
+        case DOUBLE_WORD:
         case FLOAT:
         case REAL:
         case TEXT:

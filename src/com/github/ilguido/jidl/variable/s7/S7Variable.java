@@ -109,6 +109,9 @@ public abstract class S7Variable extends VariableCommon {
       case WORD:
         s += "WORD";
         break;
+      case DOUBLE_WORD:
+        s += "DWORD";
+        break;
       case DOUBLE_INTEGER:
         s += "DINT";
         break;

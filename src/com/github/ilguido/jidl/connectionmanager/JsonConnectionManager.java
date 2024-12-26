@@ -102,7 +102,9 @@ public class JsonConnectionManager extends ConnectionManager
       case BYTE:
       case TEXT:
       case DOUBLE_INTEGER:
+      case FLOAT:
       case REAL:
+      case DOUBLE_WORD:
         v = new JsonVariableReader(inName, inAddress, inType);
         break;
       default:

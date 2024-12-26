@@ -100,6 +100,7 @@ public class JsonVariableReader extends JsonVariable
         case DOUBLE_INTEGER:
         case BYTE:
         case WORD:
+        case DOUBLE_WORD:
           value = jo.getIntegerOrDefault(jkey);
           break;
         case FLOAT:

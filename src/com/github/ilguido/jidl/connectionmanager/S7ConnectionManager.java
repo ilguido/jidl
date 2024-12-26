@@ -211,7 +211,9 @@ public class S7ConnectionManager extends PLCConnectionManager {
       case DOUBLE_INTEGER:
       case INTEGER:
       case REAL:
+      case DOUBLE_WORD:
       case WORD:
+      case BYTE:
       case TEXT:
         v = new S7VariableReader(inName, inAddress, inType, client);
         break;
@@ -257,7 +259,9 @@ public class S7ConnectionManager extends PLCConnectionManager {
       case DOUBLE_INTEGER:
       case INTEGER:
       case REAL:
+      case DOUBLE_WORD:
       case WORD:
+      case BYTE:
       case TEXT:
         v = new S7VariableWriter(inName, inAddress, inType, inSource, client);
         break;

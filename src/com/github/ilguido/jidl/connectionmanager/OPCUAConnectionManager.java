@@ -242,6 +242,7 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
       case REAL:
       case BYTE:
       case WORD:
+      case DOUBLE_WORD:
       case TEXT:
         v = new OPCUAVariableReader(inName, inAddress, inType, client);
         break;
@@ -289,6 +290,7 @@ public class OPCUAConnectionManager extends PLCConnectionManager {
       case REAL:
       case BYTE:
       case WORD:
+      case DOUBLE_WORD:
       case TEXT:
         v = new OPCUAVariableWriter(inName, inAddress, inType, inSource,
                                     client);

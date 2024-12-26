@@ -120,7 +120,8 @@ public class ModbusVariableReader extends ModbusVariable
               int i = Integer.parseInt(o.toString());
               intValue = (intValue << 16) + (i & 0xFFFF);
             }
-            if (this.getType() == DataType.DOUBLE_INTEGER) 
+            if (this.getType() == DataType.DOUBLE_INTEGER ||
+                this.getType() == DataType.DOUBLE_WORD)
               value = Integer.valueOf(intValue);
             else
               //REAL
