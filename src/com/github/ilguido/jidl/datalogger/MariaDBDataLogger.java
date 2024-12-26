@@ -250,8 +250,14 @@ public class MariaDBDataLogger extends DataLogger {
 
     // try to read all the other data
     for (int i = 1; i < headers.size(); i++) {
-      sqlValues += "," + inData.get(headers.get(i));
-      sqlHeader += ",`" + headers.get(i) + "`";
+      /* Let's insert a value only if it is not null.
+       * MariaDB automatically sets to null column values which are not
+       * inserted, when adding a new row.
+       */
+      if (inData.get(headers.get(i)) != null) {
+        sqlValues += "," + inData.get(headers.get(i));
+        sqlHeader += ",`" + headers.get(i) + "`";
+      }
     }
     sqlHeader += ") ";
     sql = "INSERT INTO `" + inTableName + "` " + sqlHeader + sqlValues + ");";

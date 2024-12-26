@@ -115,9 +115,12 @@ public abstract class VariableCommon implements Variable {
   /**
    * Converts the value of the variable to a string.
    *
-   * @return the value of the variable as a string
+   * @return the value of the variable as a string, or null if value is null
    */
   public String toString() {
+    if (value == null)
+      return null;
+    
     return value.toString();
   }
   
