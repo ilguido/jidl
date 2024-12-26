@@ -76,7 +76,7 @@ public class S7VariableWriter extends S7Variable
     /* If there is a working client, check the connection to the variable. */
     if (inClient != null) {
       PlcWriteRequest writeRequest = inClient.writeRequestBuilder()
-        .addItem(inName, "%" + inAddress + ":" + getPLC4JDataType(inType), value)
+        .addItem(inName, getPLC4JAddress(), value)
         .build();
     }
   }
@@ -95,8 +95,7 @@ public class S7VariableWriter extends S7Variable
     PlcConnection client = (PlcConnection) inClient;
     value = source.getValue();
     PlcWriteRequest writeRequest = client.writeRequestBuilder()
-      .addItem(this.getName(), "%" + this.getAddress() + ":" + 
-               getPLC4JDataType(this.getType()), value).build();
+      .addItem(this.getName(), getPLC4JAddress(), value).build();
       
     //TODO: differentiate between connection errors and configuration errors
     PlcWriteResponse response = writeRequest.execute().get(1, SECONDS);

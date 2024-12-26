@@ -82,7 +82,7 @@ public abstract class ModbusVariable extends VariableCommon {
         addressSuffix = "[2]";
         break;
       case TEXT:
-        addressSuffix = "[125]";
+        addressSuffix = "[" + getTagSize() + "]";
         break;
       default:
         addressSuffix = "";
@@ -183,7 +183,11 @@ public abstract class ModbusVariable extends VariableCommon {
           throw new IllegalArgumentException("Illegal Modbus address for " +
                                              "string variable: " + 
                                              inAddress);
-        length = 125;
+        length = this.getType().getSize();
+        if (this.getType().getSize() == null) {
+          /* default value */
+          length = 127;
+        }
         break;
       default:
         throw new IllegalArgumentException("Illegal type for Modbus");

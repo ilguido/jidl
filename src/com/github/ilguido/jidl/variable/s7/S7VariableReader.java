@@ -65,7 +65,7 @@ public class S7VariableReader extends S7Variable
     /* If there is a working client, check the connection to the variable. */
     if (inClient != null) {
       PlcReadRequest readRequest = inClient.readRequestBuilder()
-        .addItem(inName, "%" + inAddress + ":" + getPLC4JDataType(inType))
+        .addItem(inName, getPLC4JAddress())
         .build();
     }
   }
@@ -83,8 +83,7 @@ public class S7VariableReader extends S7Variable
     throws IOException, Exception {
     PlcConnection client = (PlcConnection) inClient;
     PlcReadRequest readRequest = client.readRequestBuilder()
-      .addItem(this.getName(), "%" + this.getAddress() + ":" + 
-               getPLC4JDataType(this.getType()))
+      .addItem(this.getName(), getPLC4JAddress())
       .build();
       
     //TODO: differentiate between connection errors and configuration errors
@@ -93,20 +92,7 @@ public class S7VariableReader extends S7Variable
       if(response.getResponseCode(fieldName) != PlcResponseCode.OK) {
         throw new Exception("Cannot read from connection");
       } else {
-        if (this.getType() == DataType.TEXT) {
-          Object items[] = new Object[254];
-          for(int i = 0; i < 254; i++) {
-            items[i] = response.getObject(fieldName, i);
-          }
-          String s = "";
-          for (Object o : items) {
-            int i = Integer.parseInt(o.toString());
-            s += (char) i;
-          }
-          value = s;
-        } else {
-          value = response.getObject(fieldName);
-        }
+        value = response.getObject(fieldName);
       }
     }
     

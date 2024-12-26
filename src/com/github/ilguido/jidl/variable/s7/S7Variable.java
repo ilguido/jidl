@@ -35,6 +35,12 @@ import org.apache.plc4x.java.api.PlcConnection;
 
 public abstract class S7Variable extends VariableCommon {
   /**
+   * The size property of a S7 string.  Strings in S7 have a size in characters,
+   * this is it.
+   */
+  private Integer stringSize;
+    
+  /**
    * Class constructor.  It calls the parent class constructor and then sets the
    * client property.
    *
@@ -51,6 +57,19 @@ public abstract class S7Variable extends VariableCommon {
                     PlcConnection inClient)
     throws IllegalArgumentException {
     super(inName, inAddress, inType);
+    
+    if (inType == DataType.TEXT) {
+      stringSize = inType.getSize();
+      
+      if (stringSize == null) {
+        /* Set the default value for a string. */
+        stringSize = 254;
+      } else if (stringSize > 254) {
+        /* Maximum size is 254. */
+        throw 
+          new IllegalArgumentException("Maximum size for S7 strings is 254.");
+      }
+    }
   }
   
   /**
@@ -67,29 +86,37 @@ public abstract class S7Variable extends VariableCommon {
   }
   
   /**
-   * Returns the code used by PLC4J to identify the data type.
+   * Returns the address used by PLC4J to identify the variable on the PLC.
    *
-   * @param inType the data type of the variable
-   * @return the PLC4J data type as a string
+   * @return the PLC4J address as a string
    */
-  static protected String getPLC4JDataType(DataType inType) {
-    switch (inType) {
+  protected String getPLC4JAddress() {
+    String s = "%" + this.getAddress() + ":";
+    
+    switch (this.getType()) {
       case BOOLEAN:
-        return "BOOL";
+        s += "BOOL";
+        break;
       case BYTE:
-        return "BYTE";
+        s += "BYTE";
+        break;
       case TEXT:
-        return "STRING";
+        s += "STRING(" + stringSize.toString() + ")";
+        break;
       case INTEGER:
-        return "INT";
+        s += "INT";
+        break;
       case WORD:
-        return "WORD";
+        s += "WORD";
+        break;
       case DOUBLE_INTEGER:
-        return "DINT";
+        s += "DINT";
+        break;
       case REAL:
-        return "REAL";
+        s += "REAL";
+        break;
     }
     
-    return "";
+    return s;
   }
 }

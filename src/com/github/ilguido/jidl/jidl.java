@@ -334,7 +334,9 @@ public class jidl implements DataTypes {
                                                        );
                   }
                   
-                  wc.addVariableWriter(name, address, DataType.valueOf(type),
+                  wc.addVariableWriter(name, 
+                                       address, 
+                                       DataType.valueOfDataType(type),
                                        vrSource);
                 } else {
                   /* Add a new VariableReader to the connection and to the map
@@ -342,8 +344,9 @@ public class jidl implements DataTypes {
                    */
                   vrmap.put(fullname,
                             cm.addVariableReader(name, 
-                                                  address, 
-                                                  DataType.valueOf(type)));
+                                                 address, 
+                                                 DataType.valueOfDataType(type)
+                                                 ));
                 }
                 break;
               }
