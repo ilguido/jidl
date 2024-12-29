@@ -188,6 +188,9 @@ public class jidl implements DataTypes {
       dataLogger.addConnection(cm);
     }
     
+    /* Reset everything. */
+    dataLogger.stopLogging();
+    
     return outConfiguration;
   }
   

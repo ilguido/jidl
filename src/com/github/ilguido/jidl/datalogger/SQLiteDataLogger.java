@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.sql.*;
+import java.sql.SQLException;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 
@@ -52,42 +52,7 @@ import com.github.ilguido.jidl.utils.Validator;
  * @author Stefano Guidoni
  */
 
-public class SQLiteDataLogger extends DataLogger {
-  /**
-   * Path to the database file.
-   */
-  private final Path filepath;
-
-  /**
-   * Name of the database, also name of the database file without the extension.
-   */
-  private final String dbName;
-
-  /**
-   * Name of the column where configuration information is stored.
-   */
-  private final String configurationColumnName = "DATA";
-
-  /**
-   * Name of the table where the configuration is stored.
-   */
-  private final String configurationTableName = "JIDL Configuration";
-
-  /**
-   * Name of the table to store diagnostics messages.
-   */
-  private final String diagnosticsTableName = "JIDL Diagnostics";
-
-  /**
-   * Name of the column to store diagnostics messages.
-   */
-  private final String diagnosticsColumnName = "MESSAGE";
-
-  /**
-   * Header of the table.
-   */
-  private Map<String, ArrayList<String>> sqlHeaders;
-  
+public class SQLiteDataLogger extends SQLDataLogger {
   /**
    * The internal archiver for logged data.
    */
@@ -108,19 +73,12 @@ public class SQLiteDataLogger extends DataLogger {
   public SQLiteDataLogger(String inName,
                           String inDir)
     throws IllegalArgumentException, ExecutionException {
-    super(inName, inDir);
-
-    // store the database in a file called <inName>.db
-    String filename = inName.concat(".db");
-    filepath = Paths.get(inDir, filename);
-
-    dbName = "jdbc:sqlite:" + filepath.toString();
-
-    // initialization
-    sqlHeaders = new HashMap<String, ArrayList<String>>();
+    super(inName, inDir, 
+          "jdbc:sqlite:", Paths.get(inDir, inName.concat(".db")).toString(),
+          "org.sqlite.JDBC", "SQLite", null, null);
 
     // if the file already exists, store a message in the diagnostics
-    if (FileManager.checkExistence(filepath.toString())) {
+    if (FileManager.checkExistence(databasePath.toString())) {
       try {
         // if the db already exists, initialize sqlHeaders
         String query = "SELECT name FROM sqlite_schema WHERE " + 
@@ -140,7 +98,7 @@ public class SQLiteDataLogger extends DataLogger {
           sqlHeaders.put(s, headers);
         }
         
-        log("Loading: " + dbName, false);
+        log("Loading: " + databaseURL, false);
       } catch (SQLException e) {
         throw new ExecutionException("Error retrieving configuration from " +
                                      "SQLite database", e);
@@ -252,13 +210,14 @@ public class SQLiteDataLogger extends DataLogger {
       
       //backup old data
       String sql;
-      sql = "backup to " + filepath + "-" + TimeString.getTodayDateS() + ".db";
+      sql = "backup to " + databasePath + "-" + TimeString.getTodayDateS() + 
+            ".db";
       
       try {
         executeUpdateStatement(sql);
         
         //LOG
-        log("backup data from: " + filepath, false);
+        log("backup data from: " + databasePath, false);
       } catch (SQLException e) {
         log("Failed data backup: " + sql, true);
       }
@@ -383,109 +342,5 @@ public class SQLiteDataLogger extends DataLogger {
       if (inError)
         throw new IllegalStateException("Datalogger cannot insert data");
     }
-  }
-
-  /**
-   * ExecuteStatement
-   * A common interface for the Java functions used to execute SQL statements.
-   *
-   * @version 0.8
-   * @author Stefano Guidoni
-   */
-  private interface ExecuteStatement<A> {
-    /**
-     * Execute the statement <code>s</code> with the Statement object
-     * <code>stmt</code>.
-     *
-     * @param s the SQL statement to execute
-     * @param stmt a Statement object connected to a database
-     * @return the return value of the actual function used to execute the
-     *         statement
-     * @throws SQLException if there is an error with the execution of the SQL
-     *                      statement
-     */
-    public A go(String s, Statement stmt) throws SQLException;
-  }
-  
-  
-  /**
-   * Executes an SQL query on the current database and returns an array list.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @return the array list
-   * @throws SQLException if the execution of the SQL query fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private ArrayList<String> executeQueryStatement(String sqlStatement)
-    throws SQLException, IllegalArgumentException {
-    return executeStatement(sqlStatement,
-                            new ExecuteStatement<ArrayList<String>>() {
-                              public ArrayList<String> go(String s,
-                                                          Statement stmt) 
-                                throws SQLException {
-                                ArrayList<String> al = new ArrayList<>();
-                                ResultSet rs = stmt.executeQuery(s);
-                                while (rs.next()) {
-                                  al.add(rs.getString(1));
-                                }
-                                return al;
-                              }; 
-                            });
-  }
-  
-  /**
-   * Executes an SQL statement on the current database and returns the number
-   * of affected rows.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @return the number of affected rows
-   * @throws SQLException if the execution of the SQL statement fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private Integer executeUpdateStatement(String sqlStatement)
-    throws SQLException, IllegalArgumentException {
-    return executeStatement(sqlStatement,
-                            new ExecuteStatement<Integer>() {
-                              public Integer go(String s, Statement stmt) 
-                                throws SQLException {
-                                return Integer.valueOf(stmt.executeUpdate(s));
-                              };
-                            });
-  }
-  
-  /**
-   * Executes an SQL statement on the current database.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @param f the function used to execute the SQL statement
-   * @return the return value of <code>f</code>
-   * @throws SQLException if the execution of the SQL statement fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private <A> A executeStatement(String sqlStatement, ExecuteStatement<A> f)
-    throws SQLException, IllegalArgumentException {
-    Connection c = null;
-    Statement stmt = null;
-    A retValue = null;
-
-    try {
-      // this throws an exception if SQLite is unavailable
-      Class.forName("org.sqlite.JDBC");
-    } catch (ClassNotFoundException e) {
-      stopLogging();
-      throw new IllegalArgumentException("SQLite driver is not available", e);
-    }
-    
-    c = DriverManager.getConnection(dbName);
-    stmt = c.createStatement();
-
-    retValue = f.go(sqlStatement, stmt);
-    stmt.close();
-    c.close();
-    
-    return retValue;
   }
 }

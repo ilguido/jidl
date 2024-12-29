@@ -372,6 +372,11 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
     
     // if the timer is running stop it
     if (timer != null) {
+      /* If the timer is running, we are now stopping a running data logger.
+       * Must log the event.
+       */
+      log(name + ": stopLogging()", false);
+      
       timer.shutdown();
       try {
         if (!timer.awaitTermination(3, SECONDS)) {
@@ -387,8 +392,6 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
     for (final ConnectionManager connection : connectionList) {
       connection.disconnect();
     }
-    
-    log(name + ": stopLogging()", false);
   }
   
   /**

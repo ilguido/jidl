@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.sql.*;
+import java.sql.SQLException;
 
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 import com.github.ilguido.jidl.DataTypes;
@@ -48,52 +48,7 @@ import com.github.ilguido.jidl.utils.TimeString;
  /* NOTE: MonetDB is case sensitive and column names are always converted to
   *       lower case.
   */
-public class MonetDBDataLogger extends DataLogger {
-  /**
-   * URL to the database.
-   */
-  private final String dbURL;
-  
-  /**
-   * The user name for the Monet DB database.
-   */
-  private final String userName;
-  
-  /**
-   * The password for the Monet DB database.
-   */
-  private final String password;
-
-  /**
-   * Name of the column where configuration information is stored.
-   */
-  private final String configurationColumnName = "DATA";
-
-  /**
-   * Name of the table where the configuration is stored.
-   */
-  private final String configurationTableName = "JIDL Configuration";
-
-  /**
-   * Name of the table to store diagnostics messages.
-   */
-  private final String diagnosticsTableName = "JIDL Diagnostics";
-
-  /**
-   * Name of the column to store diagnostics messages.
-   */
-  private final String diagnosticsColumnName = "MESSAGE";
-  
-  /**
-   * Connection to the database.
-   */
-  private Connection connection = null;
-  
-  /**
-   * Header of the table.
-   */
-  private Map<String, ArrayList<String>> sqlHeaders;
-
+public class MonetDBDataLogger extends SQLDataLogger {
   /**
    * Class constructor.  It calls the parent class constructor setting the
    * name and the working directory of the database.
@@ -119,23 +74,11 @@ public class MonetDBDataLogger extends DataLogger {
                            String inUserName,
                            String inPassword)
     throws IllegalArgumentException, ExecutionException {
-    super(inName, inDir);
+    super(inName, inDir, 
+          "jdbc:monetdb:", "//" + inServer + ":" + inPort + "/" + inName,
+          "org.monetdb.jdbc.MonetDriver", "MonetDB",
+          inUserName, inPassword);
 
-    dbURL = "jdbc:monetdb://" + inServer + ":" + inPort + "/" + inName;
-
-    // initialization
-    sqlHeaders = new HashMap<String, ArrayList<String>>();
-
-    // try to connect to the database
-    try {
-      connection = DriverManager.getConnection(dbURL, inUserName, inPassword);
-    } catch (SQLException e) {
-      throw new ExecutionException("Cannot connect to MonetDB database", e);
-    }
-    
-    userName = inUserName;
-    password = inPassword;
-    
     try {
       // if the db already exists, initialize sqlHeaders
       String query = "SELECT name FROM sys.tables WHERE NOT system " + 
@@ -155,7 +98,7 @@ public class MonetDBDataLogger extends DataLogger {
         sqlHeaders.put(s, headers);
       }
       
-      log("Loading: " + dbURL, false);
+      log("Loading: " + databaseURL, false);
     } catch (SQLException e) {
       throw new ExecutionException("Error retrieving configuration from " +
                                     "MonetDB database", e);
@@ -187,43 +130,6 @@ public class MonetDBDataLogger extends DataLogger {
     }
     
     return map;
-  }
-
-  /**
-   * Starts the data logging.  It throws an exception, if it cannot get a valid
-   * connection to the database.
-   *
-   * @throws ExecutionException if it cannot initialize a connection to the
-   *                            database
-   */
-  @Override
-  public void startLogging() throws ExecutionException {
-    if (connection == null)
-      try {
-        connection = DriverManager.getConnection(dbURL, userName, password);
-        super.startLogging();
-      } catch (SQLException e) {
-        throw new ExecutionException("Cannot initialize a valid connection to "+
-                                     "MonetDB", e);
-      }
-  }
-  
-  /**
-   * Stops the data logging.  Close the connection with the database.
-   */
-  @Override
-  public void stopLogging() {
-    super.stopLogging();
-    
-    if (connection != null) {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      } finally {
-        connection = null;
-      }
-    }
   }
 
   /**
@@ -291,106 +197,5 @@ public class MonetDBDataLogger extends DataLogger {
         throw new IllegalStateException("Datalogger cannot insert data");
       }
     }
-  }
-
-  /**
-   * ExecuteStatement
-   * A common interface for the Java functions used to execute SQL statements.
-   *
-   * @version 0.8
-   * @author Stefano Guidoni
-   */
-  private interface ExecuteStatement<A> {
-    /**
-     * Execute the statement <code>s</code> with the Statement object
-     * <code>stmt</code>.
-     *
-     * @param s the SQL statement to execute
-     * @param stmt a Statement object connected to a database
-     * @return the return value of the actual function used to execute the
-     *         statement
-     * @throws SQLException if there is an error with the execution of the SQL
-     *                      statement
-     */
-    public A go(String s, Statement stmt) throws SQLException;
-  }
-  
-  
-  /**
-   * Executes an SQL query on the current database and returns an array list.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @return the array list
-   * @throws SQLException if the execution of the SQL statement fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private ArrayList<String> executeQueryStatement(String sqlStatement)
-    throws SQLException, IllegalArgumentException {
-    return executeStatement(sqlStatement,
-                            new ExecuteStatement<ArrayList<String>>() {
-                              public ArrayList<String> go(String s,
-                                                          Statement stmt) 
-                                throws SQLException {
-                                ArrayList<String> al = new ArrayList<>();
-                                ResultSet rs = stmt.executeQuery(s);
-                                while (rs.next()) {
-                                  al.add(rs.getString(1));
-                                }
-                                return al;
-                              }; 
-                            });
-  }
-  
-  /**
-   * Executes an SQL statement on the current database and returns the number
-   * of affected rows.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @return the number of affected rows
-   * @throws SQLException if the execution of the SQL statement fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private Integer executeUpdateStatement(String sqlStatement)
-    throws SQLException, IllegalArgumentException {
-    return executeStatement(sqlStatement,
-                            new ExecuteStatement<Integer>() {
-                              public Integer go(String s, Statement stmt) 
-                                throws SQLException {
-                                return Integer.valueOf(stmt.executeUpdate(s));
-                              };
-                            });
-  }
-  
-  /**
-   * Executes an SQL statement on the current database.
-   *
-   * @param sqlStatement the SQL statement to execute
-   * @param f the function used to execute the SQL statement
-   * @return the return value of <code>f</code>
-   * @throws SQLException if the execution of the SQL statement fails
-   * @throws IllegalArgumentException if the driver for the database is not
-   *                                  available
-   */
-  private <A> A executeStatement(String sqlStatement, ExecuteStatement<A> f)
-    throws SQLException, IllegalArgumentException {
-    Statement stmt = null;
-    A retValue = null;
-
-    try {
-      // this throws an exception if a Monet DB driver is unavailable
-      Class.forName("org.monetdb.jdbc.MonetDriver");
-    } catch (ClassNotFoundException e) {
-      stopLogging();
-      throw new IllegalArgumentException("MonetDB driver is not available", e);
-    }
-    
-    stmt = connection.createStatement();
-
-    retValue = f.go(sqlStatement, stmt);
-    stmt.close();
-    
-    return retValue;
   }
 }
