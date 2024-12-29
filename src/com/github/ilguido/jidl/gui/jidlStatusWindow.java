@@ -193,7 +193,8 @@ public class jidlStatusWindow extends JFrame
                            rb.getString("sample time") + ": ",
                            doc.getStyle("regular"));
           doc.insertString(doc.getLength(),
-                           String.valueOf(cm.getSampleTime() / 10.0) + "s\n\n",
+                           String.format("%.1f", (cm.getSampleTime() / 10.0)) +
+                           "s\n\n",
                            doc.getStyle("italic"));
           
           // connection status
