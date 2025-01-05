@@ -4,9 +4,9 @@
 
 ### EDITABLE SECTION
 # java compilers
-JAVAC=javac
-JAVADOC=javadoc
-JAR=jar
+JAVAC=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/javac
+JAVADOC=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/javadoc
+JAR=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/jar
 JIDL_VERSION=0.8
 CLASSPATH="./:../libs/*"
 
@@ -35,8 +35,9 @@ DATA_FILES="$JIDL_PATH/jidl/datalogger/*.java $JIDL_PATH/jidl/datalogger/datalog
 CONNECTION_FILES="$JIDL_PATH/jidl/connectionmanager/*.java"
 CLIENT_FILES="$JIDL_PATH/jidl/jidlclient/*.java"
 UTILS_FILES="$JIDL_PATH/jidl/utils/*.java"
+IPC_FILES="$JIDL_PATH/jidl/ipc/*.java"
 GUI_FILES="$JIDL_PATH/jidl/gui/*.java $JIDL_PATH/jidl/gui/locale/*.java"
-SRC_FILES="$COMMON_FILES $JIDL_FILES $DATA_FILES $CONNECTION_FILES $UTILS_FILES $CLIENT_FILES"
+SRC_FILES="$COMMON_FILES $JIDL_FILES $DATA_FILES $CONNECTION_FILES $UTILS_FILES $CLIENT_FILES $IPC_FILES"
 
 # update the version of all files
 sed -i "s/@version [0-9]\.[0-9]\{1,2\}/@version $JIDL_VERSION/g" $SRC_FILES $GUI_FILES
