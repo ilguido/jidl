@@ -265,8 +265,7 @@ public class jidlss extends jidl {
       
       // load configuration
       loadItem.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent actionEvent) 
-          throws IllegalArgumentException {
+        public void actionPerformed(ActionEvent actionEvent) {
             if (dataLogger != null && dataLogger.getStatus() == true) {
               trayIcon.displayMessage("JIDL",
       rb.getString("Could not perform the action while data logging is running"),
