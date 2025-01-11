@@ -74,7 +74,7 @@ public class S7ConnectionManager extends PLCConnectionManager {
                              int inSlot,
                              int inDeciseconds)
     throws IllegalArgumentException {
-    super(inName, "S7", "s7://" + inIP + "?remote-rack=" + inRack +
+    super(inName, "s7", "s7://" + inIP + "?remote-rack=" + inRack +
                         "&remote-slot=" + inSlot);
 
     ipAddress = inIP;

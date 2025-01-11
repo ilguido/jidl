@@ -248,7 +248,7 @@ public class jidl implements DataTypes {
           
           try {
             switch (sectionMap.get("type")) {
-              case "S7":
+              case "s7":
                 newc = new S7ConnectionManager(sectionMap.get("section"),
                                                sectionMap.get("address"),
                                 Integer.parseInt(sectionMap.get("rack")),
@@ -256,7 +256,7 @@ public class jidl implements DataTypes {
                                parseSampleTime(sectionMap.get("seconds"),
                                          sectionMap.get("deciseconds")));
                 break;
-              case "modbus":
+              case "modbus-tcp":
                 newc = new ModbusConnectionManager(sectionMap.get("section"),
                                                    sectionMap.get("address"),
                                     Integer.parseInt(sectionMap.get("port")),

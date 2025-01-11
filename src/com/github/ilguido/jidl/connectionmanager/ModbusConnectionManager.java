@@ -73,7 +73,7 @@ public class ModbusConnectionManager extends PLCConnectionManager {
                                  boolean inOrder,
                                  int inDeciseconds)
     throws IllegalArgumentException {
-    super(inName, "modbus", "modbus-tcp:tcp://" + inIP + ":" +
+    super(inName, "modbus-tcp", "modbus-tcp:tcp://" + inIP + ":" +
                             Integer.toString(inPort));
 
     ipAddress = inIP;
