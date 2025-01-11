@@ -28,8 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
@@ -45,7 +45,7 @@ import com.github.ilguido.jidl.utils.FileManager;
 /**
  * JidlProtocolServer
  * A class to manage a server for the Jidl Protocol.  It is based
- * on ProcBribdge protocol.
+ * on the ProcBribdge protocol.
  *
  * @version 0.8
  * @author Stefano Guidoni
@@ -64,7 +64,7 @@ public class JidlProtocolServer {
   private final RequestHandlerInterface requestHandler;
 
   /**
-   * An executor.
+   * An executor to run the server on a separate thread.
    */
   private ExecutorService executor;
   

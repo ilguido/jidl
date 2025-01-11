@@ -104,7 +104,8 @@ public final class JidlProtocol {
     } else if (JidlProtocolStatusCode.isBad(statusCode)) {
       return new AbstractMap.SimpleEntry<>(statusCode, body);
     } else {
-      throw new JidlProtocolException(JidlProtocolStatusCode.BAD_RESPONSE_INVALID_STATUS_CODE);
+      throw new JidlProtocolException(
+                       JidlProtocolStatusCode.BAD_RESPONSE_INVALID_STATUS_CODE);
     }
   }
   
