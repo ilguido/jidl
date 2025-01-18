@@ -38,10 +38,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.github.ilguido.jidl.DataTypes;
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 import com.github.ilguido.jidl.connectionmanager.WriteableConnection;
 import com.github.ilguido.jidl.datalogger.dataloggerarchiver.DataLoggerArchiver;
-import com.github.ilguido.jidl.DataTypes;
+import com.github.ilguido.jidl.ipc.DataLoggerRequestHandler;
+import com.github.ilguido.jidl.ipc.JidlProtocolServer;
 import com.github.ilguido.jidl.utils.TimeString;
 
 /**
@@ -144,6 +146,28 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
     addConnectionCommon(inConnection); // maybe there will be a split between
                                        // addConnectionWithoutVariables and
                                        // addConnectionWithVariables
+  }
+    
+  /**
+   * Searches and returns a {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager}
+   * object from the <code>connectionList</code> list, by its given name.
+   * When there is not an object with that name, this function throws an
+   * exception.
+   *
+   * @param inConnectionName the name of the required connection
+   * @return the connection, if found
+   * @throws IllegalArgumentException when no connection is found
+   */
+  public ConnectionManager getConnectionByName(String inConnectionName)
+    throws IllegalArgumentException {
+    for (final ConnectionManager connection : connectionList) {
+      if (connection.getName().equals(inConnectionName)) {
+        return connection;
+      }
+    }
+
+    throw new IllegalArgumentException("No such connection: " +
+                                       inConnectionName);
   }
   
   /**
@@ -451,26 +475,4 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
    */
   protected abstract void addEntry(String inTableName,
                                    Map<String, String> inData);
-  
-  /**
-   * Searches and returns a {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager}
-   * object from the <code>connectionList</code> list, by its given name.
-   * When there is not an object with that name, this function throws an
-   * exception.
-   *
-   * @param inConnectionName the name of the required connection
-   * @return the connection, if found
-   * @throws IllegalArgumentException when no connection is found
-   */
-  private ConnectionManager getConnectionByName(String inConnectionName)
-    throws IllegalArgumentException {
-    for (final ConnectionManager connection : connectionList) {
-      if (connection.getName().equals(inConnectionName)) {
-        return connection;
-      }
-    }
-
-    throw new IllegalArgumentException("No such connection: " +
-                                       inConnectionName);
-  }
 }

@@ -249,7 +249,7 @@ public abstract class ConnectionManager implements DataTypes {
    * Returns the type of the variable by the specified name.
    *
    * @param inName the name of the variable
-   * @return the data type of the variable as defined in {@link com.github.ilguido.jidl.DataTypes}
+   * @return the data type of the variable as defined in {@link DataTypes}
    * @throws NoSuchElementException if a variable by the name of
    *                                <code>inName</code> does not exist
    */
@@ -258,6 +258,21 @@ public abstract class ConnectionManager implements DataTypes {
     Variable v = getVariableReaderByName(inName);
 
     return v.getType();
+  }
+  
+  /**
+   * Returns the value of the variable by the specified name.
+   *
+   * @param inName the name of the variable
+   * @return the value of the variable as an Object
+   * @throws NoSuchElementException if a variable by the name of
+   *                                <code>inName</code> does not exist
+   */
+  public Object getVariableValueByName(String inName)
+    throws NoSuchElementException {
+    Variable v = getVariableReaderByName(inName);
+
+    return v.getValue();
   }
   
   /**
