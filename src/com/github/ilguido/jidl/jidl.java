@@ -94,6 +94,9 @@ public class jidl implements DataTypes {
           if (dataLogger.getStatus())
             dataLogger.stopLogging();
             
+          if (dataLogger.getIPCStatus())
+            dataLogger.stopIPCServer();
+            
           if (dataLogger.isArchiver() && dataLogger.isArchiverSet()) {
             dataLogger.stopArchivingService();
           }

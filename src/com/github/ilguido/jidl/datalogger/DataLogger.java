@@ -72,6 +72,11 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
   private int internalCounter;
 
   /**
+   * A server for IPC.
+   */
+  private JidlProtocolServer ipcServer = null;
+   
+  /**
    * Date format.
    */
   private String dateFormat = "yyyy-MM-dd HH:mm:ss,S";
@@ -147,27 +152,49 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
                                        // addConnectionWithoutVariables and
                                        // addConnectionWithVariables
   }
-    
+  
   /**
-   * Searches and returns a {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager}
-   * object from the <code>connectionList</code> list, by its given name.
-   * When there is not an object with that name, this function throws an
-   * exception.
+   * Initializes an IPC server.  It requires the certificates to establish 
+   * trusted connections. It can start and stop the data logger, if enabled.
+   * The server is immediately started.
    *
-   * @param inConnectionName the name of the required connection
-   * @return the connection, if found
-   * @throws IllegalArgumentException when no connection is found
+   * @param inPort the port of the server
+   * @param inControlEnable a boolean value, which is <code>true</code> if the
+   *                        data logger can be started or stopped by IPC
+   * @param inKeyStore the path to the certificate file of the server
+   * @param inKeyStorePassword the password to open the certificate file
+   * @param inTrustStore the path to the file with the trusted certificates
+   * @param inTrustStorePassword the password to open the file with the trusted
+   *                             certificates
+   * @throws IllegalArgumentException if at least one of the files does not 
+   *                                  exist, or the path is <code>null</code>
+   * @throws RuntimeException if a server was already added or if the server
+   *                          failed to start
    */
-  public ConnectionManager getConnectionByName(String inConnectionName)
-    throws IllegalArgumentException {
-    for (final ConnectionManager connection : connectionList) {
-      if (connection.getName().equals(inConnectionName)) {
-        return connection;
-      }
+  public void addIPCServer(final int inPort, 
+                           final boolean inControlEnable,
+                           final String inKeyStore,
+                           final String inKeyStorePassword,
+                           final String inTrustStore,
+                           final String inTrustStorePassword)
+    throws IllegalArgumentException, RuntimeException {
+    if (ipcServer != null)
+      throw new RuntimeException("DataLogger: addIPCServer: ipcServer != null");
+    
+    DataLoggerRequestHandler 
+      dlrh = new DataLoggerRequestHandler(inControlEnable, this);
+    
+    ipcServer = new JidlProtocolServer(inPort,
+                                       dlrh,
+                                       inKeyStore,
+                                       inKeyStorePassword,
+                                       inTrustStore,
+                                       inTrustStorePassword);
+    try {
+      ipcServer.start();
+    } catch (Exception e) {
+      throw new RuntimeException("DataLogger: addIPCServer: ipcServer.start()");
     }
-
-    throw new IllegalArgumentException("No such connection: " +
-                                       inConnectionName);
   }
   
   /**
@@ -177,6 +204,21 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
    */
   public String getDateFormat() {
     return dateFormat;
+  }
+  
+  /**
+   * Returns the status of the IPC server.  If the server is up and running,
+   * the status is <code>true</code>.
+   *
+   * @return a boolean value, <code>true</code> if IPC is working
+   */
+  public boolean getIPCStatus() {
+    if (ipcServer != null) {
+      if (ipcServer.isStarted())
+        return true;
+    }
+    
+    return false;
   }
   
   /**
@@ -389,6 +431,18 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
   }
 
   /**
+   * Stops the IPC server.
+   *
+   * @throws RuntimeException if the server is not initialized
+   */
+  public void stopIPCServer() {
+    if (ipcServer == null)
+      throw new RuntimeException("DataLogger: stopIPCServer: ipcServer==null");
+    
+    ipcServer.stop();
+  }
+  
+  /**
    * Stops the data logging.
    */
   public void stopLogging() {
@@ -475,4 +529,26 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
    */
   protected abstract void addEntry(String inTableName,
                                    Map<String, String> inData);
+  
+  /**
+   * Searches and returns a {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager}
+   * object from the <code>connectionList</code> list, by its given name.
+   * When there is not an object with that name, this function throws an
+   * exception.
+   *
+   * @param inConnectionName the name of the required connection
+   * @return the connection, if found
+   * @throws IllegalArgumentException when no connection is found
+   */
+  public ConnectionManager getConnectionByName(String inConnectionName)
+    throws IllegalArgumentException {
+    for (final ConnectionManager connection : connectionList) {
+      if (connection.getName().equals(inConnectionName)) {
+        return connection;
+      }
+    }
+
+    throw new IllegalArgumentException("No such connection: " +
+                                       inConnectionName);
+  }
 }
