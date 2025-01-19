@@ -41,8 +41,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import com.github.ilguido.jidl.DataTypes;
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 import com.github.ilguido.jidl.connectionmanager.WriteableConnection;
+import com.github.ilguido.jidl.datalogger.DataLoggerRequestHandler;
 import com.github.ilguido.jidl.datalogger.dataloggerarchiver.DataLoggerArchiver;
-import com.github.ilguido.jidl.ipc.DataLoggerRequestHandler;
 import com.github.ilguido.jidl.ipc.JidlProtocolServer;
 import com.github.ilguido.jidl.utils.TimeString;
 

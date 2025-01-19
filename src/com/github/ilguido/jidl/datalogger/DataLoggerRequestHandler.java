@@ -19,13 +19,14 @@
  * along with jidl.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ilguido.jidl.ipc;
+package com.github.ilguido.jidl.datalogger;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 import com.github.ilguido.jidl.datalogger.DataLogger;
+import com.github.ilguido.jidl.ipc.RequestHandlerInterface;
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
