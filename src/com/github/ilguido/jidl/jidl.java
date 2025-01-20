@@ -211,7 +211,7 @@ public class jidl implements DataTypes {
    */
   private 
   static List<ConnectionManager> 
-        parseInitializationData(List<Map<String, String>> inInitializationData) 
+        parseInitializationData(List<Map<String, String>> inInitializationData)
     throws IllegalArgumentException, ExecutionException {
     List<ConnectionManager> list = new LinkedList<>();
     /* A hashmap of VariableReader objects that we could use as a source when
@@ -231,6 +231,7 @@ public class jidl implements DataTypes {
          * the format of its name.
          *
          * "Type"     | "Format"
+         * main conf. | (empty, no name, only one such section)
          * connection | xyz 
          * tag reader | abc::xyz
          * tag writer | def::tuw<-abc::xyz
@@ -241,7 +242,34 @@ public class jidl implements DataTypes {
           toIndex = sectionMap.get("section").length();
         }
 
-        if (atIndex == -1) {
+        if (sectionMap.get("section").length() < 1) {
+          /* The only empty section is for the general configuration. */
+          
+          /* IPC server configuration. */
+          if (sectionMap.get("ipc_port") != null &&
+              sectionMap.get("ipc_keystore") != null &&
+              sectionMap.get("ipc_keystorepw") != null &&
+              sectionMap.get("ipc_truststore") != null &&
+              sectionMap.get("ipc_truststorepw") != null) {
+            /* Passwords can be (should be?) encrypted. */
+            String keystorePassword = 
+              Decrypter.decrypt(sectionMap.get("ipc_keystorepw"), 
+                                sectionMap.get("salt"), 
+                                sectionMap.get("iv"));
+            String truststorePassword = 
+              Decrypter.decrypt(sectionMap.get("ipc_truststorepw"),
+                                sectionMap.get("salt"), 
+                                sectionMap.get("iv"));
+            
+            dataLogger
+              .addIPCServer(Integer.parseInt(sectionMap.get("ipc_port")),
+                            false, //TODO: a command line switch
+                            sectionMap.get("ipc_keystore"),
+                            keystorePassword,
+                            sectionMap.get("ipc_truststore"),
+                            truststorePassword);
+          }
+        } else if (atIndex == -1) {
           ConnectionManager newc = null;
           // This entry should be the configuration for a connection.
           if (sectionMap.get("type") == null) {
