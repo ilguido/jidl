@@ -85,7 +85,8 @@ public class jidlss extends jidl {
    *
    * @param args the command line arguments <br>
    *             <code>-c filename</code> to load a configuration file<br>
-   *             <code>-a</code> to autostart the data logging
+   *             <code>-a</code> to autostart the data logging<br>
+   *             <code>-r</code> to allow remote control through IPC
    */
   public static void main(String[] args) {
     jidlss jss = new jidlss();

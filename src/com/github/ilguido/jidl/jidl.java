@@ -58,6 +58,11 @@ public class jidl implements DataTypes {
   protected static List<ConnectionManager> connectionList;
   
   /**
+   * When this is true, the data logger can be started or stopped through IPC.
+   */
+  private static boolean remoteControl = false;
+  
+  /**
    * Initializes Jidl parsing the command line arguments.
    *
    * @param args the command line arguments
@@ -84,6 +89,9 @@ public class jidl implements DataTypes {
       } else if (args[i].equals("-a")) {
         // autostart
         autostart = true;
+      } else if (args[i].equals("-r")) {
+        // controls through IPC
+        remoteControl = true;
       }
     }
 
@@ -263,7 +271,7 @@ public class jidl implements DataTypes {
             
             dataLogger
               .addIPCServer(Integer.parseInt(sectionMap.get("ipc_port")),
-                            false, //TODO: a command line switch
+                            remoteControl,
                             sectionMap.get("ipc_keystore"),
                             keystorePassword,
                             sectionMap.get("ipc_truststore"),
