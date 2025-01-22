@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
 import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
@@ -62,7 +63,12 @@ public class JidlProtocolServer {
    * request.
    */
   private final RequestHandlerInterface requestHandler;
-
+  
+  /**
+   * The context used to generate the server socket.
+   */
+  private final SSLContext sslContext;
+  
   /**
    * An executor to run the server on a separate thread.
    */
@@ -79,44 +85,25 @@ public class JidlProtocolServer {
   private boolean started;
 
   /**
-   * Initializes the server.  It requires the certificates to establish trusted
-   * connections.
+   * Initializes the server.  It can use an SSL context to generate the server
+   * socket. If the SSL socket is <code>null</code>, it will be used the default
+   * context
    *
    * @param inPort the port of the server
    * @param inRequestHandler the object that actually handles the requests
    *                         received by the server
-   * @param inKeyStore the path to the certificate file of the server
-   * @param inKeyStorePassword the password to open the certificate file
-   * @param inTrustStore the path to the file with the trusted certificates
-   * @param inTrustStorePassword the password to open the file with the trusted
-   *                             certificates
-   * @throws IllegalArgumentException if at least one of the files does not 
-   *                                  exist, or the path is <code>null</code>
+   * @param inSSLContext a context to be used to generate the server socket, it
+   *                     can be <code>null</code>
    */
   public JidlProtocolServer(final int inPort, 
                             RequestHandlerInterface inRequestHandler,
-                            final String inKeyStore,
-                            final String inKeyStorePassword,
-                            final String inTrustStore,
-                            final String inTrustStorePassword) 
+                            final SSLContext inSSLContext) 
     throws IllegalArgumentException {
     this.port = inPort;
     this.requestHandler = inRequestHandler;
-    
-    /* Certificates are required by jidl to operate its IPC.
-     * If they are not available throw an exception. */
-    if (inKeyStore == null ||
-        inTrustStore == null ||
-        !FileManager.checkExistence(inKeyStore) ||
-        !FileManager.checkExistence(inTrustStore))
-      throw new IllegalArgumentException("invalid path to certificate file");
 
-    System.setProperty("javax.net.ssl.keyStore", inKeyStore);
-    System.setProperty("javax.net.ssl.keyStorePassword", inKeyStorePassword);
-    System.setProperty("javax.net.ssl.trustStore", inTrustStore);
-    System.setProperty("javax.net.ssl.trustStorePassword", 
-                       inTrustStorePassword);
-  
+    sslContext = inSSLContext;
+    
     this.started = false;
     this.executor = null;
     this.serverSocket = null;
@@ -153,19 +140,23 @@ public class JidlProtocolServer {
       return;
       //throw new IllegalStateException("server already started");
     }
-    final ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
+    /* Get a ServerSocketFactory from the SSLContext passed to this server.
+     * If the context is null, use the default.
+     * Having a specific SSLContext is useful when the server must use and trust
+     * some specific certificate.
+     */
+    final ServerSocketFactory factory = (sslContext == null? 
+                                           SSLServerSocketFactory.getDefault():
+                                           sslContext.getServerSocketFactory());
     final SSLServerSocket serverSocket;
     
     /* The following paragraph could throw an IOException. */
-    //try {
-      serverSocket = (SSLServerSocket) factory.createServerSocket(this.port);
-      serverSocket.setNeedClientAuth(true);
-      serverSocket.setEnabledCipherSuites(new String[] { 
+    serverSocket = (SSLServerSocket) factory.createServerSocket(this.port);
+    serverSocket.setNeedClientAuth(true);
+    serverSocket.setEnabledCipherSuites(new String[] { 
                                         "TLS_RSA_WITH_AES_128_GCM_SHA256" });
-      serverSocket.setEnabledProtocols(new String[] { "TLSv1.2" });
-    //} catch (IOException e) {
-    //  throw new IOException(e);
-    //}
+    serverSocket.setEnabledProtocols(new String[] { "TLSv1.2" });
+
     this.serverSocket = serverSocket;
 
     /* Run the server on a separate thread. */

@@ -22,13 +22,19 @@
 package com.github.ilguido.jidl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.time.DayOfWeek;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.SSLContext;
 
 import com.github.ilguido.jidl.datalogger.*;
 import com.github.ilguido.jidl.datalogger.dataloggerarchiver.DataLoggerArchiver;
@@ -268,14 +274,58 @@ public class jidl implements DataTypes {
               Decrypter.decrypt(sectionMap.get("ipc_truststorepw"),
                                 sectionMap.get("salt"), 
                                 sectionMap.get("iv"));
+
+            /* Let's generate an SSL context. */
+            SSLContext sslctx = null;
+            try {
+              /* Procedure:
+               *  1.generate a keystore from the keystore file and keystore
+               *    password
+               *  2.generate a truststore from the truststore file and 
+               *    truststore password
+               *  3.generate a KeyManagerFactory from the keystore and the
+               *    keystore password
+               *  4.generate a TrustManagerFactory from the truststore
+               *  5.generate an SSLContext, initialize it with the 
+               *    KeyManagerFactory and the TrustManagerFactory
+               *
+               *  An SSLContext is used to generate an SSLServerSocket with
+               *  specific (not system-wide, not JVM-wide) certificates.
+               */
+              KeyStore keyStore = KeyStore
+                                    .getInstance(KeyStore.getDefaultType());
+              keyStore.load(new FileInputStream(sectionMap
+                                                  .get("ipc_keystore")),
+                            keystorePassword.toCharArray());
+System.out.println("Qui");
+              KeyStore trustStore = KeyStore.getInstance(KeyStore
+                                                          .getDefaultType());
+              trustStore.load(new FileInputStream(sectionMap
+                                                    .get("ipc_truststore")), 
+                              truststorePassword.toCharArray());
+System.out.println("Quo");                            
+              KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+                                        KeyManagerFactory
+                                          .getDefaultAlgorithm());
+              kmf.init(keyStore, keystorePassword.toCharArray());
+              TrustManagerFactory tmf = TrustManagerFactory.getInstance(
+                                          TrustManagerFactory
+                                            .getDefaultAlgorithm());
+              tmf.init(trustStore);
+System.out.println("Qua");              
+              sslctx = SSLContext.getInstance("TLSv1.2");
+              sslctx.init(kmf.getKeyManagers(), 
+                          tmf.getTrustManagers(),
+                          SecureRandom.getInstanceStrong());
+            } catch (Exception e) {
+              throw new ExecutionException("Failed to initialize IPC server",
+                                           e);
+            }
             
             dataLogger
               .addIPCServer(Integer.parseInt(sectionMap.get("ipc_port")),
                             remoteControl,
-                            sectionMap.get("ipc_keystore"),
-                            keystorePassword,
-                            sectionMap.get("ipc_truststore"),
-                            truststorePassword);
+                            sslctx);
           }
         } else if (atIndex == -1) {
           ConnectionManager newc = null;

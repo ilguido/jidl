@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.net.ssl.SSLContext;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -154,29 +155,21 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
   }
   
   /**
-   * Initializes an IPC server.  It requires the certificates to establish 
-   * trusted connections. It can start and stop the data logger, if enabled.
+   * Initializes an IPC server.  It can use an SSL context to generate the
+   * server socket. It can start and stop the data logger, if enabled.
    * The server is immediately started.
    *
    * @param inPort the port of the server
    * @param inControlEnable a boolean value, which is <code>true</code> if the
    *                        data logger can be started or stopped by IPC
-   * @param inKeyStore the path to the certificate file of the server
-   * @param inKeyStorePassword the password to open the certificate file
-   * @param inTrustStore the path to the file with the trusted certificates
-   * @param inTrustStorePassword the password to open the file with the trusted
-   *                             certificates
-   * @throws IllegalArgumentException if at least one of the files does not 
-   *                                  exist, or the path is <code>null</code>
+   * @param inSSLContext a context to be used to generate the server socket, it
+   *                     can be <code>null</code>
    * @throws RuntimeException if a server was already added or if the server
    *                          failed to start
    */
   public void addIPCServer(final int inPort, 
                            final boolean inControlEnable,
-                           final String inKeyStore,
-                           final String inKeyStorePassword,
-                           final String inTrustStore,
-                           final String inTrustStorePassword)
+                           final SSLContext inSSLContext)
     throws IllegalArgumentException, RuntimeException {
     if (ipcServer != null)
       throw new RuntimeException("DataLogger: addIPCServer: ipcServer != null");
@@ -186,10 +179,7 @@ public abstract class DataLogger implements DataTypes, DataLoggerArchiver {
     
     ipcServer = new JidlProtocolServer(inPort,
                                        dlrh,
-                                       inKeyStore,
-                                       inKeyStorePassword,
-                                       inTrustStore,
-                                       inTrustStorePassword);
+                                       inSSLContext);
     try {
       ipcServer.start();
     } catch (Exception e) {
