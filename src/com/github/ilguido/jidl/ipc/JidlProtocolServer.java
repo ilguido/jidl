@@ -30,7 +30,6 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
@@ -86,8 +85,8 @@ public class JidlProtocolServer {
 
   /**
    * Initializes the server.  It can use an SSL context to generate the server
-   * socket. If the SSL socket is <code>null</code>, it will be used the default
-   * context
+   * socket. If the SSL context is <code>null</code>, the default context will
+   * be used instead.
    *
    * @param inPort the port of the server
    * @param inRequestHandler the object that actually handles the requests
@@ -102,7 +101,7 @@ public class JidlProtocolServer {
     this.port = inPort;
     this.requestHandler = inRequestHandler;
 
-    sslContext = inSSLContext;
+    this.sslContext = inSSLContext;
     
     this.started = false;
     this.executor = null;

@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -66,6 +67,11 @@ public class JidlProtocolClient {
   private final int port;
   
   /**
+   * The context used to generate the socket.
+   */
+  private final SSLContext sslContext;
+  
+  /**
    * A connection timeout in milliseconds.
    */
   private final long timeout;
@@ -81,8 +87,9 @@ public class JidlProtocolClient {
   public static final long FOREVER = 0;
 
   /**
-   * Initializes the client and sets a timeout for connections.  It also 
-   * requires the certificates to establish trusted connections. You can pass a
+   * Initializes the client and sets a timeout for connections.  It can use an 
+   * SSL context to generate the socket. If the SSLContext is <code>null</code>,
+   * the default context will be used instead. You can also pass a
    * <code>null</code> value for the executor, but you should consider to
    * instantiate a common executor, if you plan to instantiate this client 
    * multiple times. Creating a new executor for each request takes time and 
@@ -94,21 +101,14 @@ public class JidlProtocolClient {
    * @param inTimeout the timeout of the connection
    * @param inExecutorService an executor for the client thread or 
    *                          <code>null</code>
-   * @param inKeyStorePassword the password to open the certificate file
-   * @param inTrustStore the path to the file with the trusted certificates
-   * @param inTrustStorePassword the password to open the file with the trusted
-   *                             certificates
-   * @throws IllegalArgumentException if at least one of the files does not 
-   *                                  exist, or the path is <code>null</code>
+   * @param inSSLContext a context to be used to generate the client socket, it
+   *                     can be <code>null</code>
    */
   public JidlProtocolClient(String inHost, 
                             int inPort, 
                             long inTimeout, 
                             ExecutorService inExecutorService,
-                            final String inKeyStore,
-                            final String inKeyStorePassword,
-                            final String inTrustStore,
-                            final String inTrustStorePassword) {
+                            final SSLContext inSSLContext) {
     this.host = inHost;
     this.port = inPort;
     this.timeout = inTimeout;
@@ -118,17 +118,13 @@ public class JidlProtocolClient {
       final ExecutorService executor = Executors.newSingleThreadExecutor();
       this.executor = executor;
     }
-    
-    System.setProperty("javax.net.ssl.keyStore", inKeyStore);
-    System.setProperty("javax.net.ssl.keyStorePassword", inKeyStorePassword);
-    System.setProperty("javax.net.ssl.trustStore", inTrustStore);
-    System.setProperty("javax.net.ssl.trustStorePassword", 
-                       inTrustStorePassword);
+    this.sslContext = inSSLContext;
   }
 
   /**
-   * Initializes the client and does not set a timeout for connections.  It also
-   * requires the certificates to establish trusted connections. You can pass a
+   * Initializes the client and does not set a timeout for connections.  It can
+   * use an SSL context to generate the socket. If the SSLContext is
+   * <code>null</code>, the default context will be used. You can pass a
    * <code>null</code> value for the executor, but you should consider to
    * instantiate a common executor, if you plan to instantiate this client 
    * multiple times. Creating a new executor for each request takes time and 
@@ -139,22 +135,14 @@ public class JidlProtocolClient {
    * @param inPort the port of the remote server
    * @param inExecutorService an executor for the client thread or 
    *                          <code>null</code>
-   * @param inKeyStorePassword the password to open the certificate file
-   * @param inTrustStore the path to the file with the trusted certificates
-   * @param inTrustStorePassword the password to open the file with the trusted
-   *                             certificates
-   * @throws IllegalArgumentException if at least one of the files does not 
-   *                                  exist, or the path is <code>null</code>
+   * @param inSSLContext a context to be used to generate the client socket, it
+   *                     can be <code>null</code>
    */
   public JidlProtocolClient(String host, 
                             int port,
                             ExecutorService inExecutorService,
-                            final String inKeyStore,
-                            final String inKeyStorePassword,
-                            final String inTrustStore,
-                            final String inTrustStorePassword) {
-    this(host, port, FOREVER, inExecutorService, inKeyStore, inKeyStorePassword,
-         inTrustStore, inTrustStorePassword);
+                            final SSLContext inSSLContext) {
+    this(host, port, FOREVER, inExecutorService, inSSLContext);
   }
 
   /**
@@ -213,7 +201,19 @@ public class JidlProtocolClient {
      */
     final Throwable[] innerException = { null };
 
-    SocketFactory factory = SSLSocketFactory.getDefault();
+    /* Get a SocketFactory from the SSLContext passed to this server.
+     * If the context is null, use the default.
+     * Having a specific SSLContext is useful when there are multiple
+     * connections, each using different certificates to differentiate roles
+     * and functions.
+     */
+    SocketFactory factory;
+    
+    if (sslContext != null) {
+      factory = sslContext.getSocketFactory();
+    } else {
+      factory = SSLSocketFactory.getDefault();
+    }
     
     try (final SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) 
       {
