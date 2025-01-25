@@ -191,7 +191,7 @@ public class JidlProtocolClient {
    * @throws ServerException if the response from the server is not positive
    */
   public final JsonObject request(String inMethod, 
-                              JsonObject inData) 
+                                  JsonObject inData) 
     throws IOException, RuntimeException, ServerException {
      // response from the server
     final JidlProtocolStatusCode[] respStatusCode = { null };
