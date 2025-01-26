@@ -29,7 +29,7 @@ import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
-import com.github.ilguido.jidl.jidlclient.HTTPJidlClient;
+import com.github.ilguido.jidl.jidlclient.JidlClient;
 import com.github.ilguido.jidl.variable.Variable;
 import com.github.ilguido.jidl.variable.VariableReader;
 
@@ -72,8 +72,7 @@ public class JsonVariableReader extends JsonVariable
   /**
    * Reads the value of the variable from the remote device and returns itself.
    *
-   * @param inClient a {@link com.github.ilguido.jidl.jidlclient.HTTPJidlClient} as an 
-   *                 <code>Object</code>
+   * @param inClient a {@link JidlClient} as an <code>Object</code>
    * @return <code>this</code>
    * @throws IOException in case of a connection error
    * @throws Exception in case of error when reading a variable
@@ -84,7 +83,7 @@ public class JsonVariableReader extends JsonVariable
     /* Try to get the json data from the client. */
     JsonObject jo = null;
     try {
-      HTTPJidlClient client = (HTTPJidlClient) inClient;
+      JidlClient client = (JidlClient) inClient;
       jo = client.getDataAsJsonObject();
     } catch (Exception e) {
       //FIXME: do something

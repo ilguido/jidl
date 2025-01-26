@@ -26,6 +26,7 @@ import java.rmi.ServerException;
 import java.util.concurrent.ExecutorService;
 import javax.net.ssl.SSLContext;
 
+import com.github.ilguido.jidl.jidlclient.JidlClient;
 import com.github.ilguido.jidl.ipc.JidlProtocolClient;
 import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
@@ -39,7 +40,7 @@ import com.github.cliftonlabs.json_simple.Jsoner;
  * @author Stefano Guidoni
  */
 
-public class JPJidlClient {
+public class JPJidlClient implements JidlClient {
   /**
    * The server address.
    */
@@ -113,10 +114,12 @@ public class JPJidlClient {
   
   /**
    * Returns the data from the last reading as a <code>String</code>.
-   *
+   * 
    * @return the data read from the remote resource
    */
   public String getDataAsString() {
+    /* The following should never throw an IllegalArgumentException, because
+       data is guaranteed to be a JsonObject. */ 
     return Jsoner.serialize(data);
   }
   
@@ -145,7 +148,7 @@ public class JPJidlClient {
    * Reads the data from the remote HTTP server and returns this object.
    *
    * @param inMethod the request method
-   * @param inPayload the contents of the request
+   * @param inPayload the contents of the request as a <code>String</code>
    * @throws IllegalArgumentException if either the passed method or contents of
    *                                  the request are malformed
    * @throws IOException if the connection to the remote server failed
@@ -153,16 +156,34 @@ public class JPJidlClient {
   public JPJidlClient read(String inMethod,
                            String inPayload) 
     throws IllegalArgumentException, IOException {
+    JsonObject payload = Jsoner.deserialize(inPayload, new JsonObject());
+    
+    return this.read(inMethod, payload);
+  }
+  
+  /**
+   * Reads the data from the remote HTTP server and returns this object.
+   *
+   * @param inMethod the request method
+   * @param inPayload the contents of the request as a <code>JsonObject</code>
+   * @throws IllegalArgumentException if either the passed method or contents of
+   *                                  the request are malformed
+   * @throws IOException if the connection to the remote server failed
+   */
+  public JPJidlClient read(String inMethod,
+                           JsonObject inPayload) 
+    throws IllegalArgumentException, IOException {
     JsonObject read;
     
     try {
-      read = client.request(inMethod, 
-                            Jsoner.deserialize(inPayload, new JsonObject()));
+      read = client.request(inMethod, inPayload);
     } catch (ServerException se) {
       throw new IllegalArgumentException(se.getMessage());
     } catch (Exception e) {
-      throw new IOException();
+      throw new IOException(e);
     }
+    
+    data = read;
     
     return this;
   }

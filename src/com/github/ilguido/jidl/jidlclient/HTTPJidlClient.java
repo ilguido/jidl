@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import com.github.ilguido.jidl.jidlclient.JidlClient;
 import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
@@ -40,7 +41,7 @@ import com.github.cliftonlabs.json_simple.Jsoner;
  * @author Stefano Guidoni
  */
 
-public class HTTPJidlClient {
+public class HTTPJidlClient implements JidlClient {
   /**
    * The HTTP url of the remote resource as a string.
    */
@@ -127,9 +128,8 @@ public class HTTPJidlClient {
    * tries to parse the data as JSON data and returns the parsed JSON object.
    *
    * @return the data read from the remote resource
-   * @throws JsonException if the parsing of the data failed
    */
-  public JsonObject getDataAsJsonObject() throws JsonException {
+  public JsonObject getDataAsJsonObject() {
     return Jsoner.deserialize(readData, new JsonObject());
   }
   
