@@ -47,6 +47,54 @@ import com.github.ilguido.jidl.variable.VariableWriter;
 
 public abstract class ConnectionManager implements DataTypes {
   /**
+   * Splits an internal qualifier and returns its parts, for a connection, a 
+   * variable reader, or a variable writer.  Given an internal variable 
+   * qualifier, e.g. <code>var::conn</code>, this function returns the name of
+   * the variable, e.g. <code>var</code>, and the name of the connection, e.g.
+   * <code>conn</code>, in an array, in this order. The internal variable
+   * qualifier of a variable writer is split into three parts: variable name,
+   * connection name, and source.
+   *
+   * @param inQualifier the internal qualifier
+   * @return an array of text strings
+   * @throws IllegalArgumentException if the parameter is not a valid qualifier
+   */
+  static public String[] splitQualifier(String inQualifier)
+    throws IllegalArgumentException {
+    if (inQualifier == null)
+      throw new IllegalArgumentException("Invalid qualifier");
+      
+    String address = inQualifier;
+    String[] outArray = {null, null, null};
+ 
+    int atIndex = address.indexOf("::"); // variable readers have this
+    int toIndex = address.indexOf("<-"); // variable writers have this
+    
+    if (inQualifier.length() < 1) {
+      //
+    } else if (atIndex == -1) {
+      outArray[0] = Validator.validateString(address);
+    } else {
+      String name = address.substring(0, atIndex);
+      if (toIndex == -1) {
+        String connection = address.substring(atIndex + 2);
+        
+        outArray[0] = Validator.validateString(name);
+        outArray[1] = Validator.validateString(connection);
+      } else {
+        String connection = address.substring(atIndex + 2, toIndex);
+        String source = address.substring(toIndex + 2);
+        
+        outArray[0] = Validator.validateString(name);
+        outArray[1] = Validator.validateString(connection);
+        outArray[2] = Validator.validateString(source);
+      }
+    }
+    
+    return outArray;
+  }
+  
+  /**
    * Status of the connection.  It is false if the connection has not been
    * established or failed.
    */
@@ -368,7 +416,7 @@ public abstract class ConnectionManager implements DataTypes {
    * @return this {@link com.github.ilguido.jidl.connectionmanager.ConnectionManager} object
    */
   public abstract ConnectionManager read();
-    
+  
   /**
    * Updates the timestamp to now.  The <code>timestamp</code> property is set
    * to now.

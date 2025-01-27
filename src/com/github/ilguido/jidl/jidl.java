@@ -237,9 +237,8 @@ public class jidl implements DataTypes {
     if (inInitializationData != null)
       // Parse the configuration
       for (final Map<String, String> sectionMap : inInitializationData) {
-        int atIndex = sectionMap.get("section").indexOf("::");
-        int toIndex = sectionMap.get("section").indexOf("<-");
-        boolean isWriter = false;
+        String[] sectionArray = ConnectionManager
+                                  .splitQualifier(sectionMap.get("section"));
         
         /* We distinguish the type of each entry in the configuration table by
          * the format of its name.
@@ -250,13 +249,8 @@ public class jidl implements DataTypes {
          * tag reader | abc::xyz
          * tag writer | def::tuw<-abc::xyz
          */
-        if (toIndex != -1) {
-          isWriter = true;
-        } else {
-          toIndex = sectionMap.get("section").length();
-        }
 
-        if (sectionMap.get("section").length() < 1) {
+        if (sectionArray[0] == null) {
           /* The only empty section is for the general configuration. */
           
           /* IPC server configuration. */
@@ -297,13 +291,13 @@ public class jidl implements DataTypes {
               keyStore.load(new FileInputStream(sectionMap
                                                   .get("ipc_keystore")),
                             keystorePassword.toCharArray());
-System.out.println("Qui");
+
               KeyStore trustStore = KeyStore.getInstance(KeyStore
                                                           .getDefaultType());
               trustStore.load(new FileInputStream(sectionMap
                                                     .get("ipc_truststore")), 
                               truststorePassword.toCharArray());
-System.out.println("Quo");                            
+
               KeyManagerFactory kmf = KeyManagerFactory.getInstance(
                                         KeyManagerFactory
                                           .getDefaultAlgorithm());
@@ -312,7 +306,7 @@ System.out.println("Quo");
                                           TrustManagerFactory
                                             .getDefaultAlgorithm());
               tmf.init(trustStore);
-System.out.println("Qua");              
+
               sslctx = SSLContext.getInstance("TLSv1.2");
               sslctx.init(kmf.getKeyManagers(), 
                           tmf.getTrustManagers(),
@@ -327,7 +321,7 @@ System.out.println("Qua");
                             remoteControl,
                             sslctx);
           }
-        } else if (atIndex == -1) {
+        } else if (sectionArray[1] == null) {
           ConnectionManager newc = null;
           // This entry should be the configuration for a connection.
           if (sectionMap.get("type") == null) {
@@ -389,21 +383,16 @@ System.out.println("Qua");
           // This entry should be the configuration for a variable reader or
           // writer.
           String fullname = sectionMap.get("section");
-          String name = fullname.substring(0, atIndex);
+          String name = sectionArray[0];
           String address = sectionMap.get("address");
           String type = sectionMap.get("type");
-          String connection = fullname.substring(atIndex + 2, toIndex);
-          String source = null;
-          if (isWriter) {
-            source = fullname.substring(toIndex + 2);
-          }
+          String connection = sectionArray[1];
+          String source = sectionArray[2];
 
-          if (name != null && address != null &&
-              type != null && connection != null &&
-              (source != null || !isWriter)) {
+          if (address != null && type != null) {
             for (ConnectionManager cm : list) {
               if (connection.equals(cm.getName())) {
-                if (isWriter) {
+                if (source != null) {
                   /* Check whether the connection is writeable. */
                   WriteableConnection wc;
                   if (cm instanceof WriteableConnection) {
