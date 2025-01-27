@@ -88,8 +88,10 @@ public class DataLoggerRequestHandler implements RequestHandlerInterface {
             }
                         
             Output payload:
-            { "connection_name_1": [value_1, value_2, value_3],
-              "connection_name_2": [value_4", value_5, value_6],
+            { "var_1::connection_name_1": value_1,
+              "var_2::connection_name_1": value_2,
+              ...
+              "var_4::connection_name_2": value_4,
               ...             
             }
             
@@ -140,8 +142,8 @@ public class DataLoggerRequestHandler implements RequestHandlerInterface {
    *
    * @param inRequestMap a map containing names of connections as keys and 
    *                     arrays of variable names as values
-   * @return a JsonObject containing the names of the connections and the
-   *         values of the requested variables as arrays
+   * @return a JsonObject containing the full qualifiers of variables and their
+   *         value
    */
   private JsonObject handleValueRequest(JsonObject inRequestMap) {
     JsonObject outJO = new JsonObject();
@@ -149,16 +151,15 @@ public class DataLoggerRequestHandler implements RequestHandlerInterface {
     /* iterations through all requested connection names */
     for (Object requestedConnection : inRequestMap.keySet()) {
       String rcS = (String) requestedConnection;
-      JsonArray ja = new JsonArray();
       
       JsonArray varList= (JsonArray) inRequestMap.get(rcS);
       ConnectionManager cm = datalogger.getConnectionByName(rcS);
 
       /* iterations through all requested variable names of a connection */
       for (Object requestedValue : varList) {
-        ja.add(cm.getVariableValueByName((String) requestedValue));
+        outJO.put((String) requestedValue + "::" + rcS, 
+                  cm.getVariableValueByName((String) requestedValue));
       }
-      outJO.put(rcS, ja);
     }
     
     return outJO;
