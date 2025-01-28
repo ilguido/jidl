@@ -87,7 +87,7 @@ public abstract class ConnectionManager implements DataTypes {
         
         outArray[0] = Validator.validateString(name);
         outArray[1] = Validator.validateString(connection);
-        outArray[2] = Validator.validateString(source);
+        outArray[2] = source;
       }
     }
     
