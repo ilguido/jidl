@@ -36,8 +36,8 @@ import java.sql.SQLException;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 
-import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
 import com.github.ilguido.jidl.datalogger.dataloggerarchiver.DataLoggerArchiverHelper;
+import com.github.ilguido.jidl.datalogger.sqlheader.SQLHeader;
 import com.github.ilguido.jidl.DataTypes;
 import com.github.ilguido.jidl.utils.CalendarUtilities;
 import com.github.ilguido.jidl.utils.FileManager;
@@ -93,9 +93,23 @@ public class SQLiteDataLogger extends SQLDataLogger {
                   "WHERE name NOT LIKE '" + getTimestampS() + "' ORDER BY cid;";
 
           ArrayList<String> headers = executeQueryStatement(query);
-          headers.add(0, getTimestampS()); // the first column
           
-          sqlHeaders.put(s, headers);
+          query = "SELECT type FROM pragma_table_info('" + s + "') " +
+                  "WHERE name NOT LIKE '" + getTimestampS() + "' ORDER BY cid;";
+
+          ArrayList<String> types = executeQueryStatement(query);
+                    
+          ArrayList<SQLHeader> sqlh = new ArrayList<SQLHeader>();
+          
+          // the first column
+          sqlh.add(new SQLHeader(getTimestampS(), DataType.TEXT));
+          // all the others
+          for (int i = 0; i < headers.size(); i++) {
+            sqlh.add(new SQLHeader(headers.get(i), 
+                     DataType.valueOf(types.get(i))));
+          }
+          
+          sqlHeaders.put(s, sqlh);
         }
         
         log("Loading: " + databaseURL, false);
@@ -289,7 +303,7 @@ public class SQLiteDataLogger extends SQLDataLogger {
   protected void addEntry(String inTableName,
                           Map<String, String> inData) {
     String sql;
-    ArrayList<String> headers = sqlHeaders.get(inTableName);
+    ArrayList<SQLHeader> headers = sqlHeaders.get(inTableName);
 
     // build the VALUES and HEADER part of the SQL statement
     // the first element is always the timestamp and it is always there
@@ -302,9 +316,11 @@ public class SQLiteDataLogger extends SQLDataLogger {
        * SQLite automatically sets to null column values which are not
        * inserted, when adding a new row.
        */
-      if (inData.get(headers.get(i)) != null) {
-        sqlValues += "," + inData.get(headers.get(i));
-        sqlHeader += ",'" + headers.get(i) + "'";
+      if (inData.get(headers.get(i).getHeader()) != null) {
+        sqlValues += "," + (headers.get(i).getDataType() == DataType.TEXT? 
+                            "'" + inData.get(headers.get(i).getHeader()) + "'":
+                            inData.get(headers.get(i).getHeader()));
+        sqlHeader += ",'" + headers.get(i).getHeader() + "'";
       }
     }
     sqlHeader += ") ";

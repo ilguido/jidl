@@ -116,7 +116,7 @@ public interface DataTypes {
     public String toSQLite() {
       switch(this) {
         case BOOLEAN:
-          return "NUMERIC";
+          return "BOOLEAN";
         case INTEGER:
         case DOUBLE_INTEGER:
         case BYTE:

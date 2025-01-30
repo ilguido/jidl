@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.sql.SQLException;
 
 import com.github.ilguido.jidl.connectionmanager.ConnectionManager;
+import com.github.ilguido.jidl.datalogger.sqlheader.SQLHeader;
 import com.github.ilguido.jidl.DataTypes;
 import com.github.ilguido.jidl.utils.FileManager;
 import com.github.ilguido.jidl.utils.TimeString;
@@ -93,9 +94,24 @@ public class MonetDBDataLogger extends SQLDataLogger {
                 "' AND table = '" + s + "' ORDER BY column_id;";
 
         ArrayList<String> headers = executeQueryStatement(query);
-        headers.add(0, getTimestampS().toLowerCase()); // the first column
+
+        query = "SELECT DATA_TYPE FROM information_schema.COLUMNS WHERE " +
+                "TABLE_NAME='" + s + "' AND column_name <> '" + 
+                getTimestampS().toLowerCase() + "'";
+
+        ArrayList<String> types = executeQueryStatement(query);
         
-        sqlHeaders.put(s, headers);
+        ArrayList<SQLHeader> sqlh = new ArrayList<SQLHeader>();
+                  
+        // the first column
+        sqlh.add(new SQLHeader(getTimestampS().toLowerCase(), DataType.TEXT));
+        // all the others
+        for (int i = 0; i < headers.size(); i++) {
+          sqlh.add(new SQLHeader(headers.get(i), 
+                   DataType.valueOf(types.get(i))));
+        }
+          
+        sqlHeaders.put(s, sqlh);
       }
       
       log("Loading: " + databaseURL, false);
@@ -143,7 +159,7 @@ public class MonetDBDataLogger extends SQLDataLogger {
   protected void addEntry(String inTableName,
                           Map<String, String> inData) {
     String sql;
-    ArrayList<String> headers = sqlHeaders.get(inTableName);
+    ArrayList<SQLHeader> headers = sqlHeaders.get(inTableName);
 
     // build the VALUES and HEADER part of the SQL statement
     // the first element is always the timestamp and it is always there
@@ -156,9 +172,11 @@ public class MonetDBDataLogger extends SQLDataLogger {
        * MariaDB automatically sets to null column values which are not
        * inserted, when adding a new row.
        */
-      if (inData.get(headers.get(i)) != null) {
-        sqlValues += "," + inData.get(headers.get(i));
-        sqlHeader += ",\"" + headers.get(i) + "\"";
+      if (inData.get(headers.get(i).getHeader()) != null) {
+        sqlValues += "," + (headers.get(i).getDataType() == DataType.TEXT? 
+                            "'" + inData.get(headers.get(i).getHeader()) + "'":
+                            inData.get(headers.get(i).getHeader()));
+        sqlHeader += ",\"" + headers.get(i).getHeader() + "\"";
       }
     }
     sqlHeader += ") ";
