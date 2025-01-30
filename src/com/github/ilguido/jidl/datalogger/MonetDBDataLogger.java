@@ -95,9 +95,9 @@ public class MonetDBDataLogger extends SQLDataLogger {
 
         ArrayList<String> headers = executeQueryStatement(query);
 
-        query = "SELECT DATA_TYPE FROM information_schema.COLUMNS WHERE " +
-                "TABLE_NAME='" + s + "' AND column_name <> '" + 
-                getTimestampS().toLowerCase() + "'";
+        query = "SELECT type FROM sys.statistics('" + inName + "') " +
+                "WHERE column <> '" + getTimestampS().toLowerCase() + 
+                "' AND table = '" + s + "' ORDER BY column_id;";
 
         ArrayList<String> types = executeQueryStatement(query);
         
@@ -107,8 +107,10 @@ public class MonetDBDataLogger extends SQLDataLogger {
         sqlh.add(new SQLHeader(getTimestampS().toLowerCase(), DataType.TEXT));
         // all the others
         for (int i = 0; i < headers.size(); i++) {
-          sqlh.add(new SQLHeader(headers.get(i), 
-                   DataType.valueOf(types.get(i))));
+          //FIXME: hackish...
+          sqlh.add(new SQLHeader(headers.get(i),
+                   DataType.valueOf(types.get(i).equals("clob")? 
+                                                 "TEXT": "INTEGER")));
         }
           
         sqlHeaders.put(s, sqlh);
