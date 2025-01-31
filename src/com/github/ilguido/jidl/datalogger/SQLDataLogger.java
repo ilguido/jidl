@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import com.github.ilguido.jidl.datalogger.sqlheader.SQLHeader;
+
 /**
  * SQLiteDataLogger
  * A class to store data in a SQLite database.
@@ -85,7 +87,7 @@ public abstract class SQLDataLogger extends DataLogger {
   /**
    * Header of the table.
    */
-  protected Map<String, ArrayList<String>> sqlHeaders;
+  protected Map<String, ArrayList<SQLHeader>> sqlHeaders;
   
   /**
    * The properties of the connection to the database.
@@ -124,7 +126,7 @@ public abstract class SQLDataLogger extends DataLogger {
     super(inName, inDir);
     
     // initialization
-    sqlHeaders = new HashMap<String, ArrayList<String>>();
+    sqlHeaders = new HashMap<String, ArrayList<SQLHeader>>();
     
     databasePath = inPath;
     databaseURL = inURLProtocol + databasePath;
