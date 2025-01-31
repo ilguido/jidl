@@ -4,9 +4,9 @@
 
 ### EDITABLE SECTION
 # java compilers
-JAVAC=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/javac
-JAVADOC=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/javadoc
-JAR=/run/media/stefano/1f6cfe8b-da05-4d35-9cf6-97e236c81ea1/progetti\ e\ documenti/supervisione\ industriale/jdk-11.0.2/bin/jar
+JAVAC=javac
+JAVADOC=javadoc
+JAR=jar
 JIDL_VERSION=0.8
 CLASSPATH="./:../libs/*"
 
